@@ -39,7 +39,10 @@
   <div class="gate__panel gate__panel--top"></div>
   <div class="gate__panel gate__panel--bottom"></div>
   <div class="gate__inner">
-    <svg class="gate__mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#te-mark"/></svg>
+    <div class="gate__emblem">
+      <svg class="gate__ring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46" pathLength="100"/></svg>
+      <svg class="gate__mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#te-mark"/></svg>
+    </div>
     <p class="gate__name" data-split>Trendy Experiences</p>
     <div class="gate__load" data-gate-load>
       <span class="gate__bar"><i></i></span>
@@ -58,6 +61,7 @@
 <div class="grain" aria-hidden="true"></div>
 <div class="progress" aria-hidden="true"><span></span></div>
 <div class="spot" aria-hidden="true"></div>
+<canvas class="sparkles" aria-hidden="true"></canvas>
 
 <!-- ============ HEADER ============ -->
 <header class="header">
@@ -71,6 +75,7 @@
     <a href="#contacto" data-scramble>Contacto</a>
   </nav>
   <div class="header__end">
+    <a class="hplay" href="https://www.roblox.com/games/98318020838456/EL-CL-B" target="_blank" rel="noopener" data-magnetic data-sfx><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg><span>Jugar</span></a>
     <button class="sound" type="button" data-magnetic aria-pressed="false" aria-label="Música" data-sound>
       <span class="eqi" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
       <span class="sound__state" data-sound-state>Off</span>
@@ -85,6 +90,10 @@
     <a href="#estudio">Estudio</a>
     <a href="#contacto">Contacto</a>
   </nav>
+  <div class="menu__links">
+    <a href="https://www.roblox.com/games/98318020838456/EL-CL-B" target="_blank" rel="noopener">Jugar EL CLUB ↗</a>
+    <a href="https://discord.gg/aDVAuSXZpT" target="_blank" rel="noopener">Discord ↗</a>
+  </div>
 </div>
 
 <main>
@@ -101,6 +110,7 @@
     </h1>
     <div class="hero__row">
       <p class="hero__studio"><span class="dot"></span>Estudio de videojuegos</p>
+      <a class="hero__news" href="https://www.roblox.com/games/98318020838456/EL-CL-B" target="_blank" rel="noopener" data-sfx><span class="hero__new">Nuevo</span><span>EL CLUB ya en Roblox</span><span aria-hidden="true">↗</span></a>
       <a class="hero__down" href="#juegos" data-scramble>Desliza <span aria-hidden="true">↓</span></a>
     </div>
   </div>
@@ -139,14 +149,24 @@
 
     <div class="games__ui" data-portal-ui>
       <div class="games__top">
-        <span class="tag">Primer título</span>
-        <span class="tag tag--live"><span class="live"></span>En desarrollo</span>
+        <div class="games__tags">
+          <span class="tag">Roblox</span>
+          <span class="tag tag--live"><span class="live"></span>Juega ahora</span>
+        </div>
+        <p class="games__count" aria-hidden="true"><b data-zone-no>02</b> / 05</p>
       </div>
       <div class="games__body">
         <h2 class="neon" data-neon aria-label="EL CLUB">
           <span class="neon__l" style="--i:0" aria-hidden="true">E</span><span class="neon__l" style="--i:1" aria-hidden="true">L</span><span class="neon__gap" aria-hidden="true"> </span><span class="neon__l" style="--i:2" aria-hidden="true">C</span><span class="neon__l neon__l--weak" style="--i:3" aria-hidden="true">L</span><span class="neon__l" style="--i:4" aria-hidden="true">U</span><span class="neon__l" style="--i:5" aria-hidden="true">B</span>
         </h2>
         <p class="games__tagline">Una isla. Una noche.<br>Todo puede pasar.</p>
+        <div class="games__cta">
+          <a class="play" href="https://www.roblox.com/games/98318020838456/EL-CL-B" target="_blank" rel="noopener" data-magnetic data-sfx>
+            <span class="play__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></span>
+            <span class="play__text"><b>Jugar ahora</b><small>en Roblox</small></span>
+          </a>
+          <a class="games__discord" href="https://discord.gg/aDVAuSXZpT" target="_blank" rel="noopener" data-sfx><span data-scramble>Únete al Discord</span> <span aria-hidden="true">↗</span></a>
+        </div>
       </div>
       <div class="tabs" role="tablist" aria-label="Zonas de EL CLUB">
         <button class="tab" type="button" role="tab" aria-selected="false" data-zone="entrada"><span class="tab__time">23:00</span><span class="tab__name">La Entrada</span><span class="tab__bar"><span></span></span></button>
@@ -171,19 +191,34 @@
   </div>
 </section>
 
-<!-- ============ CONTACTO ============ -->
+<!-- ============ CONTACTO / LINKS ============ -->
 <section class="contact" id="contacto">
   <div class="wrap">
     <p class="eyebrow" data-reveal><span class="dot"></span>Contacto</p>
     <h2 class="contact__title" data-letters aria-label="Hablemos"><span aria-hidden="true">Hable</span><span aria-hidden="true">mos</span></h2>
-    <div class="contact__mail" data-reveal>
-      <a class="contact__address" href="mailto:trendyexperiences@gmail.com" data-email>trendyexperiences@gmail.com</a>
-      <button class="copy" type="button" data-copy data-magnetic>Copiar</button>
-    </div>
-    <ul class="contact__topics" data-reveal>
-      <li><a href="mailto:trendyexperiences@gmail.com?subject=Prensa"><b data-scramble>Prensa</b> <span aria-hidden="true">↗</span></a></li>
-      <li><a href="mailto:trendyexperiences@gmail.com?subject=Alianzas"><b data-scramble>Alianzas</b> <span aria-hidden="true">↗</span></a></li>
-      <li><a href="mailto:trendyexperiences@gmail.com?subject=Talento"><b data-scramble>Talento</b> <span aria-hidden="true">↗</span></a></li>
+    <ul class="links" data-skew>
+      <li class="links__item" data-reveal>
+        <a class="link-row" href="https://www.roblox.com/games/98318020838456/EL-CL-B" target="_blank" rel="noopener" data-sfx>
+          <span class="link-row__k">Roblox</span>
+          <span class="link-row__t">Jugar EL CLUB</span>
+          <span class="link-row__a" aria-hidden="true">↗</span>
+        </a>
+      </li>
+      <li class="links__item" data-reveal>
+        <a class="link-row" href="https://discord.gg/aDVAuSXZpT" target="_blank" rel="noopener" data-sfx>
+          <span class="link-row__k">Discord</span>
+          <span class="link-row__t">Únete a la comunidad</span>
+          <span class="link-row__a" aria-hidden="true">↗</span>
+        </a>
+      </li>
+      <li class="links__item links__item--mail" data-reveal>
+        <a class="link-row" href="mailto:trendyexperiences@gmail.com" data-sfx>
+          <span class="link-row__k">Correo</span>
+          <span class="link-row__t link-row__t--mail" data-email>trendyexperiences@gmail.com</span>
+          <span class="link-row__a" aria-hidden="true">↗</span>
+        </a>
+        <button class="copy" type="button" data-copy data-magnetic>Copiar</button>
+      </li>
     </ul>
   </div>
 </section>
@@ -191,6 +226,11 @@
 </main>
 
 <footer class="footer">
+  <div class="marquee" aria-hidden="true" data-skew>
+    <div class="marquee__track">
+      <span>Trendy Experiences</span><i>✦</i><span>Developing Fantasy</span><i>✦</i><span>Trendy Experiences</span><i>✦</i><span>Developing Fantasy</span><i>✦</i>
+    </div>
+  </div>
   <div class="wrap footer__row">
     <a class="brand" href="#inicio" aria-label="Volver al inicio">
       <svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#te-mark"/></svg>

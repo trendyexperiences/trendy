@@ -92,6 +92,7 @@
       const shown = fontsReady ? 1 - Math.pow(1 - raw, 2.4) : Math.min(1 - Math.pow(1 - raw, 2.4), 0.9);
       count.textContent = String(Math.round(shown * 100)).padStart(3, '0');
       bar.style.transform = `scaleX(${shown})`;
+      gate.style.setProperty('--ring', (100 - shown * 100).toFixed(2));
       if (shown >= 1) {
         load.hidden = true;
         choices.hidden = false;
@@ -149,6 +150,7 @@
   const tabs = $$('.tab', stage);
   const scene = scenes.get($('.games__canvas', stage));
   let current = tabs.findIndex((t) => t.classList.contains('is-active'));
+  const zoneNo = $('[data-zone-no]');
   let stageOpen = reduceMotion;
   let hovering = false;
   let swapTimer = null;
@@ -167,6 +169,7 @@
     void bar.offsetWidth;
     bar.style.animation = '';
     if (focus) tabs[i].focus({ preventScroll: true });
+    if (zoneNo) zoneNo.textContent = String(i + 1).padStart(2, '0');
     if (i === current) return;
     current = i;
     const strip = tabs[i].parentElement;
@@ -256,6 +259,8 @@
   const lines = $$('.wordmark__line');
   let lastY = window.scrollY;
   let ticking = false;
+  let velocity = 0;
+  const skewEls = $$('[data-skew]');
   function onScroll() {
     const y = window.scrollY;
     const vh = window.innerHeight;
@@ -267,6 +272,7 @@
       if (y > lastY + 4 && y > vh * 0.8) header.classList.add('is-hidden');
       else if (y < lastY - 4 || y < vh * 0.8) header.classList.remove('is-hidden');
     }
+    velocity = y - lastY;
     lastY = y;
 
     if (!reduceMotion && y < vh * 1.2) {
@@ -290,6 +296,101 @@
   }, { passive: true });
   window.addEventListener('resize', onScroll);
   onScroll();
+
+  /* ---------- inclinación según la velocidad del scroll ---------- */
+  if (!reduceMotion && skewEls.length) {
+    let skew = 0;
+    (function skewLoop() {
+      skew += (clamp(velocity * 0.035, -3, 3) - skew) * 0.12;
+      velocity *= 0.85;
+      const v = Math.abs(skew) < 0.01 ? 0 : skew;
+      skewEls.forEach((el) => { el.style.transform = v ? `skewY(${v.toFixed(3)}deg)` : ''; });
+      requestAnimationFrame(skewLoop);
+    })();
+  }
+
+  /* ---------- sonidos de interfaz ---------- */
+  let lastBlip = 0;
+  document.addEventListener('pointerover', (e) => {
+    const t = e.target.closest('[data-sfx], [data-magnetic], .tab, .nav a');
+    if (!t || !audio || t.contains(e.relatedTarget)) return;
+    const now = performance.now();
+    if (now - lastBlip < 70) return;
+    lastBlip = now;
+    audio.blip('hover');
+  });
+  document.addEventListener('click', (e) => {
+    if (audio && e.target.closest('a, button')) audio.blip('click');
+  });
+
+  /* ---------- destellos que siguen al cursor + onda al hacer clic ---------- */
+  const sparkCanvas = $('.sparkles');
+  if (sparkCanvas && !reduceMotion && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    const sctx = sparkCanvas.getContext('2d');
+    const parts = [];
+    let running = false;
+    let sw = 0, sh = 0;
+    const size = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      sw = window.innerWidth; sh = window.innerHeight;
+      sparkCanvas.width = sw * dpr; sparkCanvas.height = sh * dpr;
+      sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    size();
+    window.addEventListener('resize', size);
+    const COLORS = ['69,243,255', '255,255,255', '255,79,180', '150,190,255'];
+    let px = null, py = null;
+    window.addEventListener('pointermove', (e) => {
+      if (px !== null) {
+        const d = Math.hypot(e.clientX - px, e.clientY - py);
+        const n = Math.min(3, Math.floor(d / 14));
+        for (let i = 0; i < n; i++) {
+          parts.push({
+            x: e.clientX + (Math.random() - 0.5) * 8, y: e.clientY + (Math.random() - 0.5) * 8,
+            vx: (Math.random() - 0.5) * 0.6, vy: -0.2 - Math.random() * 0.6,
+            life: 0, max: 40 + Math.random() * 30, r: 1.5 + Math.random() * 2.5,
+            c: COLORS[(Math.random() * COLORS.length) | 0], rot: Math.random() * Math.PI,
+          });
+        }
+        if (parts.length > 160) parts.splice(0, parts.length - 160);
+        if (!running && parts.length) { running = true; requestAnimationFrame(draw); }
+      }
+      px = e.clientX; py = e.clientY;
+    }, { passive: true });
+    function star(x, y, r, rot) {
+      sctx.beginPath();
+      for (let i = 0; i < 8; i++) {
+        const a = rot + (i * Math.PI) / 4;
+        const rr = i % 2 ? r * 0.3 : r;
+        sctx.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr);
+      }
+      sctx.closePath();
+      sctx.fill();
+    }
+    function draw() {
+      sctx.clearRect(0, 0, sw, sh);
+      sctx.globalCompositeOperation = 'lighter';
+      for (let i = parts.length - 1; i >= 0; i--) {
+        const p = parts[i];
+        p.life++;
+        p.x += p.vx; p.y += p.vy; p.vy += 0.01; p.rot += 0.05;
+        const k = 1 - p.life / p.max;
+        if (k <= 0) { parts.splice(i, 1); continue; }
+        sctx.fillStyle = `rgba(${p.c},${k * 0.9})`;
+        star(p.x, p.y, p.r * (0.5 + k) * 1.6, p.rot);
+      }
+      if (parts.length) requestAnimationFrame(draw);
+      else { running = false; sctx.clearRect(0, 0, sw, sh); }
+    }
+    window.addEventListener('pointerdown', (e) => {
+      const r = document.createElement('span');
+      r.className = 'ripple';
+      r.style.left = `${e.clientX}px`;
+      r.style.top = `${e.clientY}px`;
+      document.body.appendChild(r);
+      setTimeout(() => r.remove(), 750);
+    });
+  }
 
   /* ---------- texto que se revuelve al pasar el mouse ---------- */
   const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';

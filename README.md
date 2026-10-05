@@ -24,6 +24,10 @@ Abre `http://localhost:3000` (o el puerto que indique).
 | `assets/js/audio.js` | Groove house tropical a 122 BPM; suena apagado "desde afuera" y se abre al cruzar la luna |
 | `assets/js/main.js` | Puerta de entrada, portal de la luna, zonas con autoplay, DEVELOPING FANTASY, menú, efectos de texto y botones, copiar correo |
 
-## Contacto
+## Links
 
-El correo del sitio es `trendyexperiences@gmail.com` (sección Contacto de `index.html`).
+- Jugar EL CLUB (Roblox): https://www.roblox.com/games/98318020838456/EL-CL-B
+- Discord: https://discord.gg/aDVAuSXZpT
+- Correo: `trendyexperiences@gmail.com`
+
+Aparecen en el header (Jugar), el aviso del inicio, el juego destacado, el menú móvil y la sección de contacto de `index.html`.

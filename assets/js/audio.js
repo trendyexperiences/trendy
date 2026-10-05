@@ -310,6 +310,25 @@
       n.stop(t + 1.4);
     },
 
+    // Sonidos de interfaz: un "tic" de cristal al pasar y un golpe suave al hacer clic
+    blip(kind) {
+      if (!this.ctx || !this.running) return;
+      const ctx = this.ctx;
+      const t = ctx.currentTime;
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = kind === 'click' ? 'triangle' : 'sine';
+      const f0 = kind === 'click' ? 520 : 1500 + Math.random() * 500;
+      o.frequency.setValueAtTime(f0, t);
+      o.frequency.exponentialRampToValueAtTime(f0 * (kind === 'click' ? 0.5 : 1.5), t + 0.08);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(kind === 'click' ? 0.12 : 0.035, t + 0.005);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + (kind === 'click' ? 0.18 : 0.09));
+      o.connect(g).connect(ctx.destination);
+      o.start(t);
+      o.stop(t + 0.2);
+    },
+
     // 0 = afuera (apagado, sólo el bombo atraviesa la pared) · 1 = en la pista
     setOpenness(x, force) {
       x = Math.max(0, Math.min(1, x));
