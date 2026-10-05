@@ -13,7 +13,6 @@
   const TE = (window.TE = window.TE || {});
   TE.pointer = TE.pointer || { x: 0, y: 0 };
   TE.beat = function () {
-    if (window.ClubAudio && window.ClubAudio.running) return window.ClubAudio.phase();
     return ((performance.now() / 1000) * (BPM / 60)) % 1;
   };
   TE.pulse = function () {
@@ -131,37 +130,40 @@
       const droop = 0.3 + R() * 0.35 + Math.abs(Math.cos(a)) * 0.3;
       const leafR = 0.85 + R() * 0.3;
       const dx = Math.cos(a), dy = Math.sin(a);
-      const M = 15;
+      const M = 14;
       const pts = [];
       for (let j = 0; j <= M; j++) {
         const s = j / M;
         pts.push([topX + dx * L * s, topY + dy * L * s + droop * L * s * s]);
       }
-      ctx.lineWidth = Math.max(1, h * 0.008);
+      // nervadura
+      ctx.lineWidth = Math.max(1, h * 0.009);
       ctx.beginPath();
       pts.forEach((p, j) => (j ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])));
       ctx.stroke();
 
-      ctx.lineWidth = Math.max(0.9, h * 0.0065);
+      // hojuelas sólidas: cuñas que cuelgan hacia la punta
       ctx.beginPath();
-      for (let j = 2; j <= M; j++) {
+      for (let j = 1; j < M; j++) {
         const s = j / M;
-        const p = pts[j], q = pts[j - 1];
-        const tx = p[0] - q[0], ty = p[1] - q[1];
+        const p = pts[j], q = pts[j + 1];
+        const tx = q[0] - p[0], ty = q[1] - p[1];
         const tl = Math.hypot(tx, ty) || 1;
         const ux = tx / tl, uy = ty / tl;
-        const ll = L * 0.3 * Math.pow(Math.sin(Math.PI * Math.min(1, s * 1.02)), 0.75) * leafR;
+        const ll = L * 0.32 * Math.pow(Math.sin(Math.PI * Math.min(1, s * 1.02)), 0.7) * leafR;
+        const bx = p[0] + tx * 0.6, by = p[1] + ty * 0.6;
         for (let k = -1; k <= 1; k += 2) {
-          // hojuela: hacia la punta y vencida por la gravedad
-          const cs = Math.cos(k * 0.95), sn = Math.sin(k * 0.95);
-          let lx = (ux * cs - uy * sn) * 0.62, ly = (ux * sn + uy * cs) * 0.62 + 0.55;
+          const cs = Math.cos(k * 0.85), sn = Math.sin(k * 0.85);
+          let lx = (ux * cs - uy * sn) * 0.6, ly = (ux * sn + uy * cs) * 0.6 + 0.6;
           const ln = Math.hypot(lx, ly) || 1;
           lx /= ln; ly /= ln;
           ctx.moveTo(p[0], p[1]);
-          ctx.quadraticCurveTo(p[0] + lx * ll * 0.6 - ly * ll * 0.06 * k, p[1] + ly * ll * 0.45, p[0] + lx * ll, p[1] + ly * ll);
+          ctx.quadraticCurveTo(p[0] + lx * ll * 0.55 + ux * ll * 0.12, p[1] + ly * ll * 0.55 + uy * ll * 0.12, p[0] + lx * ll + ux * ll * 0.2, p[1] + ly * ll + uy * ll * 0.2);
+          ctx.lineTo(bx, by);
+          ctx.closePath();
         }
       }
-      ctx.stroke();
+      ctx.fill();
     }
     ctx.beginPath();
     ctx.arc(topX, topY, h * 0.022, 0, TAU);
@@ -243,142 +245,84 @@
     ctx.fill();
   }
 
-  /* ---------- el club visto desde la playa ---------- */
-
-  function drawClub(ctx, cx, base, s, t, pulse) {
-    // Isla
-    ctx.fillStyle = '#030817';
-    ctx.beginPath();
-    ctx.moveTo(cx - 190 * s, base + 1);
-    ctx.bezierCurveTo(cx - 120 * s, base - 22 * s, cx + 120 * s, base - 24 * s, cx + 210 * s, base + 1);
-    ctx.closePath();
-    ctx.fill();
-
-    const floor = base - 16 * s;
-    // Halo del antro
-    ctx.globalCompositeOperation = 'lighter';
-    glow(ctx, cx, floor - 30 * s, 220 * s, '70,150,255', 0.16 + pulse * 0.1);
-    glow(ctx, cx, floor - 20 * s, 120 * s, '255,79,180', 0.1 + pulse * 0.12);
-    ctx.globalCompositeOperation = 'source-over';
-
-    // Edificio
-    ctx.fillStyle = '#020611';
-    ctx.fillRect(cx - 115 * s, floor - 44 * s, 230 * s, 44 * s);
-    ctx.fillRect(cx - 70 * s, floor - 72 * s, 150 * s, 28 * s);
-    ctx.fillRect(cx - 132 * s, floor - 47 * s, 264 * s, 5 * s);
-    ctx.fillRect(cx - 82 * s, floor - 75 * s, 174 * s, 4 * s);
-
-    // Ventanales que laten con la música
-    const win = linear(ctx, cx - 105 * s, 0, cx + 105 * s, 0, [
-      [0, `rgba(69,243,255,${0.55 + pulse * 0.45})`],
-      [0.5, `rgba(90,140,255,${0.5 + pulse * 0.4})`],
-      [1, `rgba(255,79,180,${0.55 + pulse * 0.45})`],
-    ]);
-    ctx.fillStyle = win;
-    ctx.fillRect(cx - 105 * s, floor - 34 * s, 210 * s, 14 * s);
-    ctx.fillStyle = `rgba(150,200,255,${0.35 + pulse * 0.3})`;
-    ctx.fillRect(cx - 60 * s, floor - 66 * s, 130 * s, 9 * s);
-    ctx.fillStyle = '#020611';
-    for (let i = -100; i <= 100; i += 20) ctx.fillRect(cx + i * s, floor - 34 * s, 3 * s, 14 * s);
-    for (let i = -55; i <= 65; i += 24) ctx.fillRect(cx + i * s, floor - 66 * s, 3 * s, 9 * s);
-
-    // Puerta
-    ctx.fillStyle = 'rgba(255,214,240,0.9)';
-    ctx.fillRect(cx - 7 * s, floor - 14 * s, 14 * s, 14 * s);
-
-    // Letrero
-    neonText(ctx, 'EL CLUB', cx + 5 * s, floor - 92 * s, 24 * s, '#ffe3f4', 'rgba(255,79,180,1)', flicker(t, 3));
-    return { x: cx + 5 * s, y: floor - 75 * s };
-  }
-
-  /* ---------- HERO ---------- */
+  /* ---------- HERO: la costa de noche (mundo Trendy) ---------- */
 
   function hero(ctx, w, h, t, S) {
     const P = TE.pointer;
-    S.mx = (S.mx || 0) + (P.x - (S.mx || 0)) * 0.045;
-    S.my = (S.my || 0) + (P.y - (S.my || 0)) * 0.045;
+    S.mx = (S.mx || 0) + (P.x - (S.mx || 0)) * 0.04;
+    S.my = (S.my || 0) + (P.y - (S.my || 0)) * 0.04;
     const mx = S.mx, my = S.my;
-    const pulse = TE.pulse();
     const portrait = h > w;
-    const hz = h * (portrait ? 0.46 : 0.64);
+    const hz = h * (portrait ? 0.52 : 0.62);
     const unit = Math.min(w, h);
 
-    ctx.fillStyle = linear(ctx, 0, 0, 0, hz, [[0, '#01030b'], [0.5, '#051230'], [0.85, '#0d2c63'], [1, '#18478c']]);
+    ctx.fillStyle = linear(ctx, 0, 0, 0, hz, [[0, '#01030b'], [0.5, '#051230'], [0.85, '#0d2c63'], [1, '#1a4a90']]);
     ctx.fillRect(0, 0, w, hz + 2);
+    drawStars(ctx, S, w, h, t, hz * 0.9, 2400, mx * -5, my * -4);
 
-    drawStars(ctx, S, w, h, t, hz * 0.9, 2600, mx * -5, my * -4);
+    // Estrella fugaz ocasional
+    if (!reduceMotion) {
+      if (!S.shoot || t > S.shoot.start + S.shoot.dur + S.shoot.wait) {
+        const R = Math.random;
+        const dir = R() < 0.5 ? 1 : -1;
+        S.shoot = { start: t, dur: 0.9, wait: 4 + R() * 7, x: w * (0.2 + R() * 0.6), y: hz * (0.06 + R() * 0.3), a: Math.PI / 2 - dir * (1.0 + R() * 0.3), len: unit * (0.25 + R() * 0.15) };
+      }
+      const sh = S.shoot;
+      const p = (t - sh.start) / sh.dur;
+      if (p >= 0 && p <= 1) {
+        const hx = sh.x + Math.cos(sh.a) * sh.len * p, hy = sh.y + Math.sin(sh.a) * sh.len * p;
+        const tx = hx - Math.cos(sh.a) * sh.len * 0.3, ty = hy - Math.sin(sh.a) * sh.len * 0.3;
+        ctx.strokeStyle = linear(ctx, tx, ty, hx, hy, [[0, 'rgba(220,235,255,0)'], [1, `rgba(235,245,255,${Math.sin(Math.PI * p) * 0.9})`]]);
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(tx, ty);
+        ctx.lineTo(hx, hy);
+        ctx.stroke();
+      }
+    }
 
-    const moonX = w * (portrait ? 0.68 : 0.6) + mx * -12;
-    const moonY = h * (portrait ? 0.17 : 0.22) + my * -8;
-    const moonR = unit * (portrait ? 0.09 : 0.075);
+    const moonX = w * (portrait ? 0.68 : 0.7) + mx * -12;
+    const moonY = h * (portrait ? 0.2 : 0.25) + my * -8;
+    const moonR = unit * (portrait ? 0.085 : 0.07);
     drawMoon(ctx, moonX, moonY, moonR);
 
-    // Nubes lentas iluminadas por la luna
     if (!S.clouds) {
       const R = rng(11);
-      S.clouds = Array.from({ length: 6 }, () => ({ x: R(), y: 0.12 + R() * 0.35, w: 0.25 + R() * 0.35, s: 0.004 + R() * 0.006 }));
+      S.clouds = Array.from({ length: 6 }, () => ({ x: R(), y: 0.12 + R() * 0.4, w: 0.25 + R() * 0.35, s: 0.004 + R() * 0.006 }));
     }
     for (const c of S.clouds) {
       const cx = (((c.x + t * c.s) % 1.4) - 0.2) * w + mx * -8;
-      const cy = c.y * hz;
       ctx.save();
-      ctx.translate(cx, cy);
+      ctx.translate(cx, c.y * hz);
       ctx.scale(1, 0.16);
-      glow(ctx, 0, 0, c.w * w * 0.5, '60,105,190', 0.22);
+      glow(ctx, 0, 0, c.w * w * 0.5, '60,105,190', 0.2);
       ctx.restore();
     }
 
-    // Haces de luz del antro
-    const clubX = w * (portrait ? 0.5 : 0.82) + mx * -20;
-    const s = unit / (portrait ? 560 : 900);
-    const origin = { x: clubX + 5 * s, y: hz - 16 * s - 75 * s };
-    ctx.globalCompositeOperation = 'lighter';
-    const beams = [
-      ['69,243,255', 0.0, 0.42], ['90,140,255', 1.7, 0.36], ['255,79,180', 3.1, 0.3], ['69,243,255', 4.6, 0.26],
-    ];
-    beams.forEach((b, i) => {
-      const ang = -Math.PI / 2 + Math.sin(t * (0.32 + i * 0.07) + b[1]) * 0.62;
-      beam(ctx, origin.x + (i - 1.5) * 18 * s, origin.y, ang, h * 1.1, 0.03, b[0], (b[2] + pulse * 0.12) * 0.55);
-    });
-    ctx.globalCompositeOperation = 'source-over';
-
     // Islas lejanas
     ctx.fillStyle = '#050d24';
-    ctx.beginPath();
-    ctx.moveTo(0, hz + 1);
-    for (let x = 0; x <= w * 0.3; x += 8) {
-      const k = x / (w * 0.3);
-      ctx.lineTo(x + mx * -10, hz - Math.sin(k * Math.PI) * unit * 0.045 - Math.sin(k * 17) * unit * 0.004);
-    }
-    ctx.lineTo(w * 0.3 + mx * -10, hz + 1);
-    ctx.closePath();
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(w * 0.78, hz + 1);
-    for (let x = w * 0.78; x <= w; x += 8) {
-      const k = (x - w * 0.78) / (w * 0.22);
-      ctx.lineTo(x + mx * -10, hz - Math.sin(k * Math.PI * 0.9) * unit * 0.03 - Math.sin(k * 23) * unit * 0.003);
-    }
-    ctx.lineTo(w, hz + 1);
-    ctx.closePath();
-    ctx.fill();
+    const ridge = (x0, x1, amp, freq) => {
+      ctx.beginPath();
+      ctx.moveTo(x0, hz + 1);
+      for (let x = x0; x <= x1; x += 8) {
+        const k = (x - x0) / (x1 - x0);
+        ctx.lineTo(x + mx * -10, hz - Math.sin(k * Math.PI) * unit * amp - Math.sin(k * freq) * unit * 0.003);
+      }
+      ctx.lineTo(x1, hz + 1);
+      ctx.closePath();
+      ctx.fill();
+    };
+    ridge(-20, w * 0.34, 0.045, 17);
+    ridge(w * 0.8, w + 20, 0.028, 23);
 
-    // Neblina sobre el horizonte
-    ctx.fillStyle = linear(ctx, 0, hz - h * 0.08, 0, hz, [[0, 'rgba(60,120,230,0)'], [1, 'rgba(60,120,230,0.16)']]);
-    ctx.fillRect(0, hz - h * 0.08, w, h * 0.08);
+    ctx.fillStyle = linear(ctx, 0, hz - h * 0.1, 0, hz, [[0, 'rgba(60,120,230,0)'], [1, 'rgba(60,120,230,0.18)']]);
+    ctx.fillRect(0, hz - h * 0.1, w, h * 0.1);
 
-    drawClub(ctx, clubX, hz, s, t, pulse);
-    [[-150, 62, 21], [-128, 48, 22], [168, 58, 23], [188, 42, 24]].forEach((p) => {
-      drawPalm(ctx, { x: clubX + p[0] * s, y: hz - 6 * s, h: p[1] * s, lean: p[0] < 0 ? -0.18 : 0.15, t, seed: p[2], color: '#030817', fronds: 8 });
-    });
-
-    // Mar
+    // Mar y reflejo de la luna
     ctx.fillStyle = linear(ctx, 0, hz, 0, h, [[0, '#0d2e62'], [0.25, '#06163a'], [1, '#01040d']]);
     ctx.fillRect(0, hz, w, h - hz);
     ctx.fillStyle = 'rgba(160,200,255,0.25)';
     ctx.fillRect(0, hz, w, 1);
-
-    // Reflejo de la luna y del antro
     ctx.globalCompositeOperation = 'lighter';
     for (let y = hz + 2; y < h; y += 3) {
       const d = (y - hz) / (h - hz);
@@ -390,147 +334,39 @@
         ctx.fillStyle = `rgba(205,225,255,${(1 - d) * 0.42 * (0.5 + 0.5 * ph)})`;
         ctx.fillRect(x0 - len / 2, y, len, 1.4);
       }
-      if (d < 0.5) {
-        const cl = 60 * s * (1 + d * 3);
-        const ph2 = 0.5 + 0.5 * Math.sin(t * 2 + y * 0.2);
-        ctx.fillStyle = `rgba(255,79,180,${(0.5 - d) * 0.5 * ph2 * (0.6 + pulse * 0.4)})`;
-        ctx.fillRect(clubX + 40 * s + Math.sin(y * 0.3 + t) * cl * 0.3, y, cl * 0.4, 1.2);
-        ctx.fillStyle = `rgba(69,243,255,${(0.5 - d) * 0.5 * (1 - ph2) * (0.6 + pulse * 0.4)})`;
-        ctx.fillRect(clubX - 60 * s + Math.sin(y * 0.27 - t) * cl * 0.3, y, cl * 0.4, 1.2);
-      }
     }
     ctx.globalCompositeOperation = 'source-over';
 
-    // Playa en primer plano
+    // Playa
     const sx = mx * -26;
     ctx.fillStyle = '#010309';
     ctx.beginPath();
     ctx.moveTo(-40, h);
-    ctx.lineTo(-40, h * 0.9);
-    ctx.bezierCurveTo(w * 0.25 + sx, h * 0.86, w * 0.55 + sx, h * 0.95, w + 40, h * 0.9);
+    ctx.lineTo(-40, h * 0.92);
+    ctx.bezierCurveTo(w * 0.25 + sx, h * 0.88, w * 0.55 + sx, h * 0.96, w + 40, h * 0.91);
     ctx.lineTo(w + 40, h);
     ctx.closePath();
     ctx.fill();
 
-    // Palmeras en primer plano (paralaje fuerte)
-    const ph = Math.min(h, w * (portrait ? 1.25 : 0.95));
-    const px = mx * -34, py = my * -10;
-    if (portrait) {
-      drawPalm(ctx, { x: w * -0.04 + px, y: h * 1.02 + py, h: ph * 0.62, lean: 0.3, t, seed: 3, rim: 'rgba(120,170,255,0.2)', rimSide: 'left' });
-      drawPalm(ctx, { x: w * 1.04 + px, y: h * 1.03 + py, h: ph * 0.5, lean: -0.3, t, seed: 5 });
-    } else {
-      drawPalm(ctx, { x: w * 0.04 + px, y: h * 1.02 + py, h: ph * 0.8, lean: 0.22, t, seed: 3, rim: 'rgba(120,170,255,0.2)', rimSide: 'left' });
-      drawPalm(ctx, { x: w * 0.15 + px, y: h * 1.04 + py, h: ph * 0.5, lean: 0.34, t, seed: 9 });
-      drawPalm(ctx, { x: w * 1.1 + px, y: h * 1.04 + py, h: ph * 0.95, lean: -0.08, t, seed: 14, rim: 'rgba(140,190,255,0.22)', rimSide: 'left' });
-    }
+    // Dos palmeras que enmarcan
+    const ph = Math.min(h, w * (portrait ? 1.3 : 0.95));
+    const px = mx * -30, py = my * -10;
+    drawPalm(ctx, { x: w * (portrait ? -0.06 : 0.05) + px, y: h * 1.03 + py, h: ph * (portrait ? 0.62 : 0.82), lean: 0.24, t, seed: 3, fronds: 9, rim: 'rgba(120,170,255,0.2)', rimSide: 'left' });
+    drawPalm(ctx, { x: w * (portrait ? 1.06 : 1.02) + px, y: h * 1.04 + py, h: ph * (portrait ? 0.5 : 0.62), lean: -0.28, t, seed: 5, fronds: 9 });
 
-    // Luciérnagas / brillos flotantes
+    // Luciérnagas
     if (!S.flies) {
       const R = rng(5);
-      S.flies = Array.from({ length: 34 }, () => ({ x: R(), y: R(), s: 0.01 + R() * 0.03, p: R() * TAU, r: 0.8 + R() * 1.6 }));
+      S.flies = Array.from({ length: 22 }, () => ({ x: R(), y: R(), s: 0.01 + R() * 0.03, p: R() * TAU, r: 0.8 + R() * 1.6 }));
     }
     ctx.globalCompositeOperation = 'lighter';
     for (const f of S.flies) {
       const fy = ((f.y - t * f.s) % 1 + 1) % 1;
       const fx = f.x * w + Math.sin(t * 0.8 + f.p) * 24 + px * 0.6;
-      const yy = h * 0.55 + fy * h * 0.45;
       const a = (0.4 + 0.6 * Math.sin(t * 2 + f.p)) * Math.sin(fy * Math.PI);
-      glow(ctx, fx, yy, f.r * 7, '69,243,255', Math.max(0, a) * 0.5);
+      glow(ctx, fx, h * 0.55 + fy * h * 0.45, f.r * 7, '69,243,255', Math.max(0, a) * 0.45);
     }
     ctx.globalCompositeOperation = 'source-over';
-  }
-
-  /* ---------- PÓSTER (arte clave) ---------- */
-
-  function poster(ctx, w, h, t, S) {
-    const pulse = TE.pulse();
-    const hz = h * 0.7;
-    ctx.fillStyle = linear(ctx, 0, 0, 0, hz, [[0, '#02040f'], [0.6, '#0a2152'], [1, '#1d4f99']]);
-    ctx.fillRect(0, 0, w, h);
-    drawStars(ctx, S, w, h, t, hz * 0.8, 1400);
-    drawMoon(ctx, w * 0.5, h * 0.3, w * 0.24);
-
-    const door = { x: w * 0.5, y: hz + h * 0.05 };
-    ctx.globalCompositeOperation = 'lighter';
-    [['69,243,255', 0], ['255,79,180', 2.1], ['90,140,255', 4.2]].forEach((b, i) => {
-      beam(ctx, door.x + (i - 1) * 10, door.y - h * 0.08, -Math.PI / 2 + Math.sin(t * 0.45 + b[1]) * 0.5, h, 0.035, b[0], 0.24 + pulse * 0.06);
-    });
-    ctx.globalCompositeOperation = 'source-over';
-
-    // Suelo / arena
-    ctx.fillStyle = linear(ctx, 0, hz, 0, h, [[0, '#050c22'], [1, '#010208']]);
-    ctx.fillRect(0, hz, w, h - hz);
-
-    // Fachada del antro
-    const fw = w * 0.5, fh = h * 0.15;
-    ctx.fillStyle = '#020511';
-    ctx.fillRect(door.x - fw / 2, door.y - fh, fw, fh);
-    ctx.fillRect(door.x - fw * 0.58, door.y - fh - 6, fw * 1.16, 8);
-    const dw = w * 0.085, dh = fh * 0.62;
-    ctx.globalCompositeOperation = 'lighter';
-    glow(ctx, door.x, door.y - dh * 0.5, w * 0.35, '255,79,180', 0.28 + pulse * 0.15);
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.fillStyle = linear(ctx, 0, door.y - dh, 0, door.y, [[0, '#ffe2f3'], [1, '#ff6fc0']]);
-    ctx.fillRect(door.x - dw / 2, door.y - dh, dw, dh);
-    ctx.save();
-    ctx.strokeStyle = '#45f3ff';
-    ctx.shadowColor = '#45f3ff';
-    ctx.shadowBlur = 14;
-    ctx.lineWidth = 2;
-    ctx.globalAlpha = flicker(t, 8);
-    ctx.strokeRect(door.x - dw / 2 - 6, door.y - dh - 6, dw + 12, dh + 6);
-    ctx.restore();
-
-    // Luz derramada en la arena
-    ctx.globalCompositeOperation = 'lighter';
-    ctx.fillStyle = linear(ctx, 0, door.y, 0, h, [[0, 'rgba(255,79,180,0.35)'], [1, 'rgba(255,79,180,0)']]);
-    ctx.beginPath();
-    ctx.moveTo(door.x - dw / 2, door.y);
-    ctx.lineTo(door.x + dw / 2, door.y);
-    ctx.lineTo(door.x + w * 0.4, h);
-    ctx.lineTo(door.x - w * 0.4, h);
-    ctx.closePath();
-    ctx.fill();
-    ctx.globalCompositeOperation = 'source-over';
-
-    // Figura caminando hacia la puerta
-    const fy = h * 0.88;
-    const step = Math.sin(t * 3.2);
-    ctx.fillStyle = '#01020a';
-    ctx.save();
-    ctx.translate(door.x - w * 0.02, fy);
-    const sc = h * 0.11;
-    ctx.beginPath();
-    ctx.ellipse(0, -sc * 1.02 - Math.abs(step) * 2, sc * 0.11, sc * 0.13, 0, 0, TAU);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(-sc * 0.2, -sc * 0.86);
-    ctx.lineTo(sc * 0.2, -sc * 0.86);
-    ctx.lineTo(sc * 0.15, -sc * 0.35);
-    ctx.lineTo(-sc * 0.15, -sc * 0.35);
-    ctx.closePath();
-    ctx.fill();
-    ctx.lineWidth = sc * 0.1;
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = '#01020a';
-    ctx.beginPath();
-    ctx.moveTo(-sc * 0.07, -sc * 0.38);
-    ctx.lineTo(-sc * 0.07 + step * sc * 0.12, 0);
-    ctx.moveTo(sc * 0.07, -sc * 0.38);
-    ctx.lineTo(sc * 0.07 - step * sc * 0.12, 0);
-    ctx.stroke();
-    // sombra larga hacia el espectador
-    ctx.globalAlpha = 0.5;
-    ctx.beginPath();
-    ctx.ellipse(0, sc * 0.18, sc * 0.12, sc * 0.3, 0, 0, TAU);
-    ctx.fill();
-    ctx.restore();
-
-    // Palmeras que enmarcan
-    drawPalm(ctx, { x: w * -0.08, y: h * 1.02, h: h * 0.56, lean: 0.24, t, seed: 31, rim: 'rgba(120,170,255,0.25)', rimSide: 'left' });
-    drawPalm(ctx, { x: w * 1.08, y: h * 1.02, h: h * 0.5, lean: -0.26, t, seed: 37, rim: 'rgba(140,190,255,0.25)', rimSide: 'left' });
-    drawPalm(ctx, { x: w * 0.1, y: hz + 4, h: h * 0.2, lean: -0.1, t, seed: 33, color: '#030817', fronds: 8 });
-    drawPalm(ctx, { x: w * 0.88, y: hz + 4, h: h * 0.24, lean: 0.12, t, seed: 35, color: '#030817', fronds: 8 });
   }
 
   /* ---------- ZONAS DEL ANTRO ---------- */
@@ -1090,7 +926,7 @@
     });
   }
 
-  const RENDERERS = { hero, poster, entrada, pista, barra, vip, terraza };
+  const RENDERERS = { hero, entrada, pista, barra, vip, terraza };
 
   /* ---------- motor: un canvas = una escena ---------- */
 
@@ -1147,6 +983,13 @@
       this.ctx.save();
       this.render(this.ctx, this.w, this.h, t, this.S, this);
       this.ctx.restore();
+    }
+
+    set(name) {
+      if (!RENDERERS[name]) return;
+      this.render = RENDERERS[name];
+      this.S = {};
+      this.draw(performance.now());
     }
 
     loop(now) {

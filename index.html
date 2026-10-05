@@ -4,35 +4,23 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Trendy Experiences</title>
-<meta name="description" content="Trendy Experiences es un estudio de videojuegos con estética Tropical Azul Nocturna. Nuestro primer juego: EL CLUB.">
+<meta name="description" content="Trendy Experiences es un estudio independiente de videojuegos con estética Tropical Azul Nocturna. Creadores de EL CLUB.">
 <meta name="theme-color" content="#030817">
-<meta property="og:title" content="Trendy Experiences · EL CLUB">
-<meta property="og:description" content="Una isla. Una noche. Un antro donde todo puede pasar.">
+<meta property="og:title" content="Trendy Experiences">
+<meta property="og:description" content="Estudio de videojuegos. Tropical Azul Nocturna.">
 <meta property="og:type" content="website">
 <script>document.documentElement.classList.add('js')</script>
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;700;800;900&family=Instrument+Sans:ital,wght@0,400..700;1,400&family=Martian+Mono:wght@400;500&family=Tilt+Neon&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;700;800;900&family=Instrument+Sans:wght@400..700&family=Martian+Mono:wght@400;500&family=Tilt+Neon&display=swap">
 <link rel="stylesheet" href="assets/css/styles.css">
 </head>
-<body class="is-loading">
+<body>
 
-<a class="skip-link" href="#contenido">Saltar al contenido</a>
+<a class="skip-link" href="#juegos">Saltar al contenido</a>
 
-<!-- ============ PRELOADER ============ -->
-<div class="preloader" aria-hidden="true">
-  <div class="preloader__panel preloader__panel--top"></div>
-  <div class="preloader__panel preloader__panel--bottom"></div>
-  <div class="preloader__inner">
-    <svg class="mark preloader__mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#te-mark"/></svg>
-    <p class="preloader__word">Trendy Experiences</p>
-    <div class="preloader__bar"><span></span></div>
-    <p class="preloader__count"><span data-count>000</span><span>Abriendo las puertas</span></p>
-  </div>
-</div>
-
-<!-- símbolo reutilizable: luna creciente sobre una ola -->
+<!-- símbolo: luna creciente sobre una ola -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
     <mask id="te-crescent">
@@ -46,363 +34,154 @@
   </defs>
 </svg>
 
-<div class="progress" aria-hidden="true"><span></span></div>
 <div class="grain" aria-hidden="true"></div>
-<div class="cursor" aria-hidden="true"><span class="cursor__label"></span></div>
 
 <!-- ============ HEADER ============ -->
 <header class="header">
   <a class="brand" href="#inicio" aria-label="Trendy Experiences, inicio">
     <svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#te-mark"/></svg>
-    <span class="brand__name">Trendy<br>Experiences</span>
+    <span class="brand__name">Trendy Experiences</span>
   </a>
   <nav class="nav" aria-label="Principal">
-    <a href="#el-club">El Club</a>
-    <a href="#zonas">El antro</a>
+    <a href="#juegos">Juegos</a>
     <a href="#estudio">Estudio</a>
-    <a href="#noticias">Noticias</a>
+    <a href="#contacto">Contacto</a>
   </nav>
-  <div class="header__actions">
-    <button class="sound" type="button" aria-pressed="false" data-sound>
-      <span class="sound__bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-      <span class="sound__text"><span class="sound__label">Sonido</span><span class="sound__state" data-sound-state>Apagado</span></span>
-    </button>
-    <a class="btn btn--small" href="#unete">Ponte en la lista</a>
-    <button class="burger" type="button" aria-expanded="false" aria-controls="menu" aria-label="Abrir menú"><span></span><span></span></button>
-  </div>
+  <button class="burger" type="button" aria-expanded="false" aria-controls="menu" aria-label="Abrir menú"><span></span><span></span></button>
 </header>
 
 <div class="menu" id="menu" hidden>
   <nav class="menu__nav" aria-label="Menú">
-    <a href="#el-club"><small>01</small>El Club</a>
-    <a href="#zonas"><small>02</small>El antro</a>
-    <a href="#estudio"><small>03</small>Estudio</a>
-    <a href="#noticias"><small>04</small>Noticias</a>
-    <a href="#unete"><small>05</small>Ponte en la lista</a>
+    <a href="#juegos">Juegos</a>
+    <a href="#estudio">Estudio</a>
+    <a href="#contacto">Contacto</a>
   </nav>
-  <p class="menu__foot">Abierto de 23:00 a 06:00 · Costa Azul Nocturna</p>
 </div>
 
-<main id="contenido">
+<main>
 
-<!-- ============ HERO ============ -->
-<section class="hero" id="inicio" aria-label="EL CLUB">
+<!-- ============ INICIO ============ -->
+<section class="hero" id="inicio">
   <canvas class="hero__canvas" data-scene="hero" aria-hidden="true"></canvas>
   <div class="hero__shade" aria-hidden="true"></div>
-
   <div class="hero__content">
-    <p class="eyebrow hero__eyebrow"><span class="dot"></span>Trendy Experiences presenta</p>
-    <h1 class="neon" aria-label="EL CLUB">
-      <span class="neon__l" style="--i:0" aria-hidden="true">E</span><span class="neon__l" style="--i:1" aria-hidden="true">L</span><span class="neon__gap" aria-hidden="true"> </span><span class="neon__l" style="--i:2" aria-hidden="true">C</span><span class="neon__l neon__l--weak" style="--i:3" aria-hidden="true">L</span><span class="neon__l" style="--i:4" aria-hidden="true">U</span><span class="neon__l" style="--i:5" aria-hidden="true">B</span>
+    <h1 class="wordmark" aria-label="Trendy Experiences">
+      <span class="wordmark__line" aria-hidden="true"><span>Trendy</span></span>
+      <span class="wordmark__line" aria-hidden="true"><span>Experiences</span></span>
     </h1>
-    <p class="hero__tagline">Una isla. Una noche. Un antro donde todo puede pasar.</p>
-    <div class="hero__actions">
-      <button class="btn btn--neon" type="button" data-trailer data-cursor="Play">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
-        Ver tráiler
-      </button>
-      <a class="btn btn--ghost" href="#unete">Quiero mi pulsera</a>
+    <div class="hero__row">
+      <p>Estudio de videojuegos</p>
+      <p class="hero__aesthetic"><span class="dot"></span>Tropical Azul Nocturna</p>
+      <a class="hero__down" href="#juegos">Nuestros juegos <span aria-hidden="true">↓</span></a>
     </div>
   </div>
-
-  <div class="hero__meta">
-    <p class="hero__coords">21°09′N · 86°50′O<br><span>Costa Azul Nocturna</span></p>
-    <button class="hero__sound" type="button" data-sound-hint>
-      <span class="hero__sound-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24"><path d="M4 13a8 8 0 0 1 16 0v4a2 2 0 0 1-2 2h-1v-6h3M4 13v4a2 2 0 0 0 2 2h1v-6H4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-      </span>
-      Sube el volumen y entra al antro
-    </button>
-    <p class="hero__clock">Hora del club<br><span data-clock>23:00</span></p>
-  </div>
-  <a class="scroll-cue" href="#manifiesto" aria-label="Bajar"><span></span></a>
 </section>
 
-<!-- ============ CINTAS ============ -->
-<div class="tapes" aria-hidden="true">
-  <div class="tape tape--back"><div class="tape__track" data-tape>
-    <span>Tropical Azul Nocturna</span><span>Lista de invitados</span><span>Cover incluido</span><span>Mesa VIP</span><span>Tropical Azul Nocturna</span><span>Lista de invitados</span><span>Cover incluido</span><span>Mesa VIP</span>
-  </div></div>
-  <div class="tape tape--front"><div class="tape__track" data-tape>
-    <span>EL CLUB</span><i>✦</i><span>Próximamente</span><i>✦</i><span>La noche es tuya</span><i>✦</i><span>EL CLUB</span><i>✦</i><span>Próximamente</span><i>✦</i><span>La noche es tuya</span><i>✦</i>
-  </div></div>
-</div>
-
-<!-- ============ MANIFIESTO ============ -->
-<section class="manifesto" id="manifiesto">
+<!-- ============ JUEGOS ============ -->
+<section class="games" id="juegos">
   <div class="wrap">
-    <p class="eyebrow"><span class="dot"></span>Trendy Experiences</p>
-    <p class="manifesto__text" data-words>Hacemos videojuegos que empiezan cuando se apaga el <em>sol</em>. Costas tropicales, luz de <em>neón</em> y noches que nadie quiere que terminen.</p>
-  </div>
-</section>
-
-<!-- ============ EL CLUB ============ -->
-<section class="game" id="el-club">
-  <div class="wrap game__grid">
-    <figure class="poster" data-tilt>
-      <canvas class="poster__canvas" data-scene="poster" aria-hidden="true"></canvas>
-      <div class="poster__shine" aria-hidden="true"></div>
-      <figcaption class="poster__text">
-        <span class="poster__top">Trendy Experiences presenta</span>
-        <span class="poster__title">EL CLUB</span>
-        <span class="poster__billing">Un juego de Trendy Experiences · Ambientado en la Costa Azul Nocturna · Abierto de 23:00 a 06:00 · Derecho de admisión reservado</span>
-        <span class="poster__soon">Próximamente</span>
-      </figcaption>
-    </figure>
-
-    <div class="game__copy">
-      <p class="eyebrow" data-reveal><span class="dot"></span>Nuestro primer juego</p>
-      <h2 class="display game__title" data-reveal>Bienvenido a <span class="neon-inline">EL CLUB</span></h2>
-      <p class="lead" data-reveal>Pasa con el cadenero, consigue tu pulsera y entra al antro más exclusivo de la costa. Aquí la noche está viva: la pista late, la barra no cierra y en el VIP se cuentan secretos que nadie más escucha.</p>
-      <p data-reveal>EL CLUB es nuestra carta de presentación. Cada rincón está construido con la estética que nos define, azul de medianoche, palmeras a contraluz y neón reflejado en el mar.</p>
-
-      <dl class="spec" data-reveal>
-        <div><dt>Estudio</dt><dd>Trendy Experiences</dd></div>
-        <div><dt>Estado</dt><dd><span class="live"></span>En desarrollo</dd></div>
-        <div><dt>Ambientación</dt><dd>Costa tropical, de noche</dd></div>
-        <div><dt>Horario</dt><dd>23:00 – 06:00</dd></div>
-        <div><dt>Plataformas</dt><dd>Por anunciar</dd></div>
-      </dl>
-
-      <div class="game__actions" data-reveal>
-        <a class="btn btn--neon" href="#zonas">Recorre el antro</a>
-        <button class="btn btn--ghost" type="button" data-trailer>Ver tráiler</button>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ ZONAS (scroll horizontal) ============ -->
-<section class="zones" id="zonas" aria-label="Zonas del antro">
-  <div class="zones__sticky">
-    <header class="zones__head">
-      <div>
-        <p class="eyebrow"><span class="dot"></span>Una noche en EL CLUB</p>
-        <h2 class="display zones__title">Recorre el antro</h2>
-      </div>
-      <div class="night" aria-hidden="true">
-        <div class="night__labels"><span>23:00</span><strong data-night-time>23:00</strong><span>06:00</span></div>
-        <div class="night__line"><span data-night-bar></span><i data-night-dot></i></div>
-      </div>
+    <header class="section-head">
+      <h2 class="display" data-reveal>Juegos</h2>
+      <p class="section-head__note" data-reveal>01 título · En desarrollo</p>
     </header>
 
-    <div class="zones__track" data-track>
-      <article class="zone">
-        <canvas class="zone__canvas" data-scene="entrada" aria-hidden="true"></canvas>
-        <div class="zone__info">
-          <p class="zone__time">23:00 · Zona 01</p>
-          <h3 class="zone__name">La Entrada</h3>
-          <p>La fila, el cadenero y la pulsera que lo cambia todo. Aquí se decide quién pasa y quién se queda viendo desde la banqueta.</p>
-        </div>
-      </article>
-      <article class="zone">
-        <canvas class="zone__canvas" data-scene="pista" aria-hidden="true"></canvas>
-        <div class="zone__info">
-          <p class="zone__time">00:30 · Zona 02</p>
-          <h3 class="zone__name">La Pista</h3>
-          <p>Luces, humo y un beat que no se detiene. El piso se enciende bajo tus pies y la bola disco reparte destellos por todo el salón.</p>
-        </div>
-      </article>
-      <article class="zone">
-        <canvas class="zone__canvas" data-scene="barra" aria-hidden="true"></canvas>
-        <div class="zone__info">
-          <p class="zone__time">01:45 · Zona 03</p>
-          <h3 class="zone__name">La Barra</h3>
-          <p>Cócteles de neón y conversaciones a gritos. Detrás del mostrador, cien botellas a contraluz y el barman que se sabe todos los chismes.</p>
-        </div>
-      </article>
-      <article class="zone">
-        <canvas class="zone__canvas" data-scene="vip" aria-hidden="true"></canvas>
-        <div class="zone__info">
-          <p class="zone__time">03:00 · Zona 04</p>
-          <h3 class="zone__name">El VIP</h3>
-          <p>Detrás del cordón de terciopelo están las mesas, las botellas con bengala y las personas que nadie sabe cómo entraron.</p>
-        </div>
-      </article>
-      <article class="zone">
-        <canvas class="zone__canvas" data-scene="terraza" aria-hidden="true"></canvas>
-        <div class="zone__info">
-          <p class="zone__time">05:40 · Zona 05</p>
-          <h3 class="zone__name">La Terraza</h3>
-          <p>Brisa del mar, foquitos colgantes y el amanecer que nadie esperaba. La última canción siempre suena aquí afuera.</p>
-        </div>
-      </article>
-    </div>
+    <article class="feature" data-feature data-reveal>
+      <canvas class="feature__canvas" data-scene="entrada" aria-hidden="true"></canvas>
+      <div class="feature__flash" aria-hidden="true"></div>
+      <div class="feature__shade" aria-hidden="true"></div>
+
+      <div class="feature__top">
+        <span class="tag tag--live"><span class="live"></span>En desarrollo</span>
+        <span class="tag">Plataformas por anunciar</span>
+      </div>
+
+      <div class="feature__body">
+        <h3 class="neon" data-neon aria-label="EL CLUB">
+          <span class="neon__l" style="--i:0" aria-hidden="true">E</span><span class="neon__l" style="--i:1" aria-hidden="true">L</span><span class="neon__gap" aria-hidden="true"> </span><span class="neon__l" style="--i:2" aria-hidden="true">C</span><span class="neon__l neon__l--weak" style="--i:3" aria-hidden="true">L</span><span class="neon__l" style="--i:4" aria-hidden="true">U</span><span class="neon__l" style="--i:5" aria-hidden="true">B</span>
+        </h3>
+        <p class="feature__tagline">Una isla. Una noche. Un antro donde todo puede pasar.</p>
+        <p class="feature__zone" data-zone-text aria-live="polite">La fila, el cadenero y la pulsera que lo cambia todo.</p>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Zonas de EL CLUB">
+        <button class="tab is-active" type="button" role="tab" aria-selected="true" data-zone="entrada" data-text="La fila, el cadenero y la pulsera que lo cambia todo."><span class="tab__time">23:00</span><span class="tab__name">La Entrada</span><span class="tab__bar"><span></span></span></button>
+        <button class="tab" type="button" role="tab" aria-selected="false" data-zone="pista" data-text="Luces, humo y un beat que no se detiene."><span class="tab__time">00:30</span><span class="tab__name">La Pista</span><span class="tab__bar"><span></span></span></button>
+        <button class="tab" type="button" role="tab" aria-selected="false" data-zone="barra" data-text="Cócteles de neón y cien botellas a contraluz."><span class="tab__time">01:45</span><span class="tab__name">La Barra</span><span class="tab__bar"><span></span></span></button>
+        <button class="tab" type="button" role="tab" aria-selected="false" data-zone="vip" data-text="Detrás del cordón: mesas, bengalas y secretos."><span class="tab__time">03:00</span><span class="tab__name">El VIP</span><span class="tab__bar"><span></span></span></button>
+        <button class="tab" type="button" role="tab" aria-selected="false" data-zone="terraza" data-text="Brisa del mar y el amanecer que nadie esperaba."><span class="tab__time">05:40</span><span class="tab__name">La Terraza</span><span class="tab__bar"><span></span></span></button>
+      </div>
+    </article>
   </div>
 </section>
 
 <!-- ============ ESTUDIO ============ -->
 <section class="studio" id="estudio">
   <div class="wrap">
-    <div class="studio__head">
-      <p class="eyebrow" data-reveal><span class="dot"></span>El estudio</p>
-      <h2 class="display studio__title" data-reveal>Tropical<br><span class="outline">Azul</span> Nocturna</h2>
-      <p class="lead" data-reveal>Es nuestra forma de ver el mundo y la regla con la que construimos cada juego. Si no se siente como una noche en la costa, no sale del estudio.</p>
+    <p class="eyebrow"><span class="dot"></span>El estudio</p>
+    <p class="manifesto" data-words>Somos Trendy Experiences. Hacemos videojuegos que empiezan cuando se apaga el <em>sol</em> y terminan cuando vuelve a salir.</p>
+
+    <div class="studio__grid">
+      <div class="studio__intro" data-reveal>
+        <h2 class="studio__title">Tropical<br>Azul Nocturna</h2>
+        <p>Es nuestra forma de ver el mundo y la regla con la que construimos cada juego. Si no se siente como una noche en la costa, no sale del estudio.</p>
+      </div>
+      <ul class="pillars">
+        <li class="pillar" data-reveal>
+          <span class="pillar__swatch pillar__swatch--a" aria-hidden="true"></span>
+          <div>
+            <h3>Azul de medianoche</h3>
+            <p>Nuestra paleta nace del cielo a las tres de la mañana: azules profundos, palmeras a contraluz y la luna sobre el mar.</p>
+          </div>
+        </li>
+        <li class="pillar" data-reveal>
+          <span class="pillar__swatch pillar__swatch--b" aria-hidden="true"></span>
+          <div>
+            <h3>Neón con intención</h3>
+            <p>La luz cuenta la historia. Un letrero que parpadea, una puerta que brilla, una pista que se enciende con el beat.</p>
+          </div>
+        </li>
+        <li class="pillar" data-reveal>
+          <span class="pillar__swatch pillar__swatch--c" aria-hidden="true"></span>
+          <div>
+            <h3>La noche como escenario</h3>
+            <p>Todo pasa entre que se pone el sol y vuelve a salir. Ahí viven nuestros personajes.</p>
+          </div>
+        </li>
+      </ul>
     </div>
-    <ul class="pillars">
-      <li class="pillar" data-reveal>
-        <span class="pillar__swatch pillar__swatch--a" aria-hidden="true"></span>
-        <h3>Azul de medianoche</h3>
-        <p>Nuestra paleta nace del cielo a las tres de la mañana. Azules profundos, palmeras a contraluz y la luna sobre el mar.</p>
-      </li>
-      <li class="pillar" data-reveal>
-        <span class="pillar__swatch pillar__swatch--b" aria-hidden="true"></span>
-        <h3>Neón con intención</h3>
-        <p>La luz cuenta la historia. Un letrero que parpadea, una puerta que brilla, una pista que se enciende con el beat.</p>
-      </li>
-      <li class="pillar" data-reveal>
-        <span class="pillar__swatch pillar__swatch--c" aria-hidden="true"></span>
-        <h3>La noche como escenario</h3>
-        <p>Todo pasa entre que se pone el sol y vuelve a salir. Ahí viven nuestros personajes y ahí te queremos ver.</p>
-      </li>
+  </div>
+</section>
+
+<!-- ============ CONTACTO ============ -->
+<section class="contact" id="contacto">
+  <div class="wrap">
+    <p class="eyebrow" data-reveal><span class="dot"></span>Contacto</p>
+    <h2 class="contact__title" data-reveal>Hablemos</h2>
+    <div class="contact__mail" data-reveal>
+      <a class="contact__address" href="mailto:hola@trendyexperiences.com" data-email>hola@trendyexperiences.com</a>
+      <button class="copy" type="button" data-copy>Copiar correo</button>
+    </div>
+    <ul class="contact__topics" data-reveal>
+      <li><a href="mailto:hola@trendyexperiences.com?subject=Prensa">Prensa <span aria-hidden="true">↗</span></a></li>
+      <li><a href="mailto:hola@trendyexperiences.com?subject=Alianzas">Alianzas <span aria-hidden="true">↗</span></a></li>
+      <li><a href="mailto:hola@trendyexperiences.com?subject=Trabajo">Trabaja con nosotros <span aria-hidden="true">↗</span></a></li>
     </ul>
-  </div>
-</section>
-
-<!-- ============ TRÁILER ============ -->
-<section class="trailer" id="trailer">
-  <div class="wrap">
-    <button class="trailer__frame" type="button" data-trailer data-cursor="Play" aria-label="Ver el tráiler de EL CLUB">
-      <span class="trailer__lights" aria-hidden="true"></span>
-      <span class="trailer__word" aria-hidden="true">EL CLUB</span>
-      <span class="trailer__bars" aria-hidden="true"></span>
-      <span class="trailer__play" aria-hidden="true">
-        <svg class="trailer__ring" viewBox="0 0 200 200">
-          <defs><path id="ring-path" d="M100,100 m-80,0 a80,80 0 1,1 160,0 a80,80 0 1,1 -160,0"/></defs>
-          <text><textPath href="#ring-path">VER TRÁILER · VER TRÁILER · VER TRÁILER · </textPath></text>
-        </svg>
-        <svg class="trailer__icon" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
-      </span>
-      <span class="trailer__caption" aria-hidden="true"><span>Tráiler oficial</span><span>EL CLUB · 2026</span></span>
-    </button>
-  </div>
-</section>
-
-<!-- ============ NOTICIAS ============ -->
-<section class="news" id="noticias">
-  <div class="wrap">
-    <div class="news__head">
-      <div>
-        <p class="eyebrow" data-reveal><span class="dot"></span>Noticias</p>
-        <h2 class="display" data-reveal>Desde la cabina</h2>
-      </div>
-      <p class="news__note" data-reveal>Anuncios, arte y avances del estudio.</p>
-    </div>
-    <div class="news__grid">
-      <a class="card card--feature" href="#el-club" data-reveal data-cursor="Leer">
-        <span class="card__art card__art--a" aria-hidden="true"><span class="card__glyph">EL CLUB</span></span>
-        <span class="card__body">
-          <span class="card__meta">Anuncio · 05 oct 2026</span>
-          <span class="card__title">EL CLUB abre sus puertas: primer vistazo al antro</span>
-          <span class="card__more">Leer más <i aria-hidden="true">→</i></span>
-        </span>
-      </a>
-      <a class="card" href="#estudio" data-reveal data-cursor="Leer">
-        <span class="card__art card__art--b" aria-hidden="true"></span>
-        <span class="card__body">
-          <span class="card__meta">Arte · 28 sep 2026</span>
-          <span class="card__title">Así construimos la estética Tropical Azul Nocturna</span>
-          <span class="card__more">Leer más <i aria-hidden="true">→</i></span>
-        </span>
-      </a>
-      <a class="card" href="#unete" data-reveal data-cursor="Leer">
-        <span class="card__art card__art--c" aria-hidden="true"></span>
-        <span class="card__body">
-          <span class="card__meta">Comunidad · 19 sep 2026</span>
-          <span class="card__title">Acceso anticipado: cómo conseguir tu pulsera</span>
-          <span class="card__more">Leer más <i aria-hidden="true">→</i></span>
-        </span>
-      </a>
-    </div>
-  </div>
-</section>
-
-<!-- ============ LISTA / PULSERA ============ -->
-<section class="join" id="unete">
-  <div class="wrap join__grid">
-    <div class="join__copy">
-      <p class="eyebrow" data-reveal><span class="dot"></span>Acceso anticipado</p>
-      <h2 class="display join__title" data-reveal>Ponte en<br>la lista</h2>
-      <p class="lead" data-reveal>Sé de los primeros en cruzar la puerta. Te avisamos del tráiler, de las pruebas cerradas y de la noche de apertura.</p>
-      <form class="join__form" data-join novalidate>
-        <label class="join__label" for="join-email">Tu correo</label>
-        <div class="join__field">
-          <input id="join-email" name="email" type="email" autocomplete="email" placeholder="tu@correo.com" required>
-          <button class="btn btn--neon" type="submit">Quiero mi pulsera</button>
-        </div>
-        <p class="join__msg" data-join-msg role="status">Solo te escribimos cuando haya algo que valga la pena.</p>
-      </form>
-    </div>
-
-    <div class="band-stage" aria-live="polite">
-      <div class="band" data-band>
-        <div class="band__strip">
-          <span class="band__holes" aria-hidden="true"></span>
-          <span class="band__brand">EL CLUB</span>
-          <span class="band__info">
-            <span class="band__kind">Acceso anticipado</span>
-            <span class="band__no">Invitado Nº <b data-band-no>----</b></span>
-          </span>
-          <span class="band__mail" data-band-mail>Tu nombre va aquí</span>
-          <span class="band__tab" aria-hidden="true"></span>
-        </div>
-      </div>
-      <p class="band-stage__note" data-band-note>Tu pulsera se enciende cuando te anotas.</p>
-    </div>
   </div>
 </section>
 
 </main>
 
-<!-- ============ FOOTER ============ -->
 <footer class="footer">
-  <div class="wrap">
-    <div class="footer__top">
-      <div class="footer__brand">
-        <svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#te-mark"/></svg>
-        <p>Estudio de videojuegos.<br>Hecho de noche, en la costa.</p>
-      </div>
-      <div class="footer__cols">
-        <div>
-          <h3>Juegos</h3>
-          <a href="#el-club">EL CLUB</a>
-        </div>
-        <div>
-          <h3>Estudio</h3>
-          <a href="#estudio">Nosotros</a>
-          <a href="#noticias">Noticias</a>
-          <a href="#unete">Acceso anticipado</a>
-        </div>
-        <div>
-          <h3>Síguenos</h3>
-          <a href="#" data-social>Instagram</a>
-          <a href="#" data-social>TikTok</a>
-          <a href="#" data-social>YouTube</a>
-          <a href="#" data-social>Discord</a>
-        </div>
-      </div>
-    </div>
-    <p class="footer__word" aria-hidden="true"><span>Trendy</span><span>Experiences</span></p>
-    <div class="footer__bottom">
-      <p>© <span data-year>2026</span> Trendy Experiences. Todos los derechos reservados.</p>
-      <a href="#inicio" class="footer__top-link">Volver arriba ↑</a>
-    </div>
+  <div class="wrap footer__row">
+    <a class="brand" href="#inicio" aria-label="Volver al inicio">
+      <svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#te-mark"/></svg>
+      <span class="brand__name">Trendy Experiences</span>
+    </a>
+    <p>© <span data-year>2026</span> Trendy Experiences. Todos los derechos reservados.</p>
+    <a class="footer__up" href="#inicio">Volver arriba ↑</a>
   </div>
 </footer>
 
-<!-- ============ MODAL TRÁILER ============ -->
-<dialog class="modal" data-modal aria-labelledby="modal-title">
-  <div class="modal__box">
-    <button class="modal__close" type="button" data-modal-close aria-label="Cerrar">×</button>
-    <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-    <p class="eyebrow"><span class="dot"></span>Tráiler oficial</p>
-    <h2 class="display modal__title" id="modal-title">El tráiler viene en camino</h2>
-    <p>Estamos dándole los últimos retoques. Ponte en la lista y te avisamos el día que salga.</p>
-    <a class="btn btn--neon" href="#unete" data-modal-close>Ponerme en la lista</a>
-  </div>
-</dialog>
-
-<script src="assets/js/audio.js" defer></script>
 <script src="assets/js/scenes.js" defer></script>
 <script src="assets/js/main.js" defer></script>
 </body>
