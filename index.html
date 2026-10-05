@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Trendy Experiences</title>
-<meta name="description" content="Trendy Experiences. Estudio de videojuegos. Tropical Azul Nocturna. Creadores de EL CLUB.">
+<meta name="description" content="Trendy Experiences. Developing fantasy. Estudio de videojuegos, creadores de EL CLUB.">
 <meta name="theme-color" content="#030817">
 <meta property="og:title" content="Trendy Experiences">
-<meta property="og:description" content="Hacemos juegos para cuando se apaga el sol.">
+<meta property="og:description" content="Developing fantasy.">
 <meta property="og:type" content="website">
 <script>document.documentElement.classList.add('js', 'gated')</script>
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
@@ -40,13 +40,13 @@
   <div class="gate__panel gate__panel--bottom"></div>
   <div class="gate__inner">
     <svg class="gate__mark" viewBox="0 0 40 40" aria-hidden="true"><use href="#te-mark"/></svg>
-    <p class="gate__name">Trendy Experiences</p>
+    <p class="gate__name" data-split>Trendy Experiences</p>
     <div class="gate__load" data-gate-load>
       <span class="gate__bar"><i></i></span>
       <span class="gate__count" data-count>000</span>
     </div>
     <div class="gate__choices" data-gate-choices hidden>
-      <button class="btn btn--neon" type="button" data-enter="sound">
+      <button class="btn btn--neon" type="button" data-enter="sound" data-magnetic>
         <span class="eqi" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
         Entrar con sonido
       </button>
@@ -57,6 +57,7 @@
 
 <div class="grain" aria-hidden="true"></div>
 <div class="progress" aria-hidden="true"><span></span></div>
+<div class="spot" aria-hidden="true"></div>
 
 <!-- ============ HEADER ============ -->
 <header class="header">
@@ -65,12 +66,12 @@
     <span class="brand__name">Trendy Experiences</span>
   </a>
   <nav class="nav" aria-label="Principal">
-    <a href="#juegos">Juegos</a>
-    <a href="#estudio">Estudio</a>
-    <a href="#contacto">Contacto</a>
+    <a href="#juegos" data-scramble>Juegos</a>
+    <a href="#estudio" data-scramble>Estudio</a>
+    <a href="#contacto" data-scramble>Contacto</a>
   </nav>
   <div class="header__end">
-    <button class="sound" type="button" aria-pressed="false" aria-label="Música" data-sound>
+    <button class="sound" type="button" data-magnetic aria-pressed="false" aria-label="Música" data-sound>
       <span class="eqi" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
       <span class="sound__state" data-sound-state>Off</span>
     </button>
@@ -99,9 +100,8 @@
       <span class="wordmark__line" aria-hidden="true"><span>Experiences</span></span>
     </h1>
     <div class="hero__row">
-      <p>Estudio de videojuegos</p>
-      <p class="hero__aesthetic"><span class="dot"></span>Tropical Azul Nocturna</p>
-      <a class="hero__down" href="#juegos">Desliza <span aria-hidden="true">↓</span></a>
+      <p class="hero__studio"><span class="dot"></span>Estudio de videojuegos</p>
+      <a class="hero__down" href="#juegos" data-scramble>Desliza <span aria-hidden="true">↓</span></a>
     </div>
   </div>
 </section>
@@ -123,11 +123,15 @@
         </mask>
       </defs>
       <rect x="-100" y="-100" width="300" height="300" fill="#030817" mask="url(#portal-mask)"/>
+      <g data-portal-wave class="portal__ring portal__ring--wave">
+        <path d="M61.781 52.281A12 12 0 1 1 47.719 38.219A10 10 0 0 0 61.781 52.281Z" fill="none" vector-effect="non-scaling-stroke"/>
+      </g>
       <g data-portal-ring class="portal__ring">
         <path d="M61.781 52.281A12 12 0 1 1 47.719 38.219A10 10 0 0 0 61.781 52.281Z" fill="none" vector-effect="non-scaling-stroke"/>
       </g>
     </svg>
 
+    <div class="games__bloom" data-portal-bloom aria-hidden="true"></div>
     <div class="games__intro" data-portal-intro>
       <p class="eyebrow"><span class="dot"></span>Juegos</p>
       <p class="games__hint">Desliza para entrar</p>
@@ -155,32 +159,15 @@
   </div>
 </section>
 
-<!-- ============ ESTUDIO ============ -->
-<section class="studio" id="estudio">
-  <div class="wrap">
-    <p class="eyebrow"><span class="dot"></span>El estudio</p>
-    <p class="manifesto" data-words>Hacemos juegos para cuando se apaga el <em>sol.</em></p>
-
-    <ul class="frames">
-      <li class="frame frame--a" data-reveal>
-        <span class="frame__art" aria-hidden="true"></span>
-        <span class="frame__no">Tropical Azul Nocturna</span>
-        <h3>Azul de medianoche</h3>
-        <p>El cielo a las 3 a.m.</p>
-      </li>
-      <li class="frame frame--b" data-reveal>
-        <span class="frame__art" aria-hidden="true"><span>neón</span></span>
-        <span class="frame__no">Tropical Azul Nocturna</span>
-        <h3>Neón</h3>
-        <p>La luz cuenta la historia.</p>
-      </li>
-      <li class="frame frame--c" data-reveal>
-        <span class="frame__art" aria-hidden="true"></span>
-        <span class="frame__no">Tropical Azul Nocturna</span>
-        <h3>Hasta el amanecer</h3>
-        <p>Ahí pasa todo.</p>
-      </li>
-    </ul>
+<!-- ============ ESTUDIO: DEVELOPING FANTASY ============ -->
+<section class="fantasy" id="estudio" aria-label="El estudio">
+  <div class="fantasy__sticky" data-fantasy>
+    <canvas class="fantasy__canvas" data-scene="fantasy" aria-hidden="true"></canvas>
+    <div class="fantasy__mask">
+      <h2 class="fantasy__title"><span>Developing</span><span>Fantasy</span></h2>
+    </div>
+    <p class="eyebrow fantasy__eyebrow"><span class="dot"></span>El estudio</p>
+    <p class="fantasy__sub">Trendy Experiences · Estudio de videojuegos</p>
   </div>
 </section>
 
@@ -188,15 +175,15 @@
 <section class="contact" id="contacto">
   <div class="wrap">
     <p class="eyebrow" data-reveal><span class="dot"></span>Contacto</p>
-    <h2 class="contact__title" data-reveal><span>Hable</span><span>mos</span></h2>
+    <h2 class="contact__title" data-letters aria-label="Hablemos"><span aria-hidden="true">Hable</span><span aria-hidden="true">mos</span></h2>
     <div class="contact__mail" data-reveal>
       <a class="contact__address" href="mailto:trendyexperiences@gmail.com" data-email>trendyexperiences@gmail.com</a>
-      <button class="copy" type="button" data-copy>Copiar</button>
+      <button class="copy" type="button" data-copy data-magnetic>Copiar</button>
     </div>
     <ul class="contact__topics" data-reveal>
-      <li><a href="mailto:trendyexperiences@gmail.com?subject=Prensa">Prensa <span aria-hidden="true">↗</span></a></li>
-      <li><a href="mailto:trendyexperiences@gmail.com?subject=Alianzas">Alianzas <span aria-hidden="true">↗</span></a></li>
-      <li><a href="mailto:trendyexperiences@gmail.com?subject=Talento">Talento <span aria-hidden="true">↗</span></a></li>
+      <li><a href="mailto:trendyexperiences@gmail.com?subject=Prensa"><b data-scramble>Prensa</b> <span aria-hidden="true">↗</span></a></li>
+      <li><a href="mailto:trendyexperiences@gmail.com?subject=Alianzas"><b data-scramble>Alianzas</b> <span aria-hidden="true">↗</span></a></li>
+      <li><a href="mailto:trendyexperiences@gmail.com?subject=Talento"><b data-scramble>Talento</b> <span aria-hidden="true">↗</span></a></li>
     </ul>
   </div>
 </section>

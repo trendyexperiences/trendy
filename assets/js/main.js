@@ -17,6 +17,26 @@
 
   root.classList.add('js');
 
+  // Parte un texto en letras (.ch) con su índice para animarlas en cascada
+  function splitLetters(el, start) {
+    let i = start || 0;
+    const text = el.textContent;
+    el.textContent = '';
+    for (const c of text) {
+      const s = document.createElement('span');
+      s.className = 'ch';
+      s.style.setProperty('--d', i++);
+      s.textContent = c === ' ' ? '\u00a0' : c;
+      el.appendChild(s);
+    }
+    return i;
+  }
+  let li = 0;
+  $$('.wordmark__line > span').forEach((el) => { li = splitLetters(el, li); });
+  $$('[data-split]').forEach((el) => splitLetters(el));
+  let ci = 0;
+  $$('[data-letters] > span').forEach((el) => { ci = splitLetters(el, ci); });
+
   /* ---------- escenas ---------- */
   const scenes = new Map();
   if (TE.mountScene) {
@@ -51,7 +71,7 @@
   const gate = $('[data-gate]');
   const hero = $('.hero');
   function enter(withSound) {
-    if (withSound) setSound(true);
+    if (withSound) setSound(true).then(() => audio && audio.sting());
     gate.classList.add('is-open');
     root.classList.remove('gated');
     setTimeout(() => hero.classList.add('is-in'), reduceMotion ? 0 : 450);
@@ -91,8 +111,6 @@
   window.addEventListener('pointermove', (e) => {
     TE.pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
     TE.pointer.y = (e.clientY / window.innerHeight) * 2 - 1;
-    root.style.setProperty('--mx', `${e.clientX}px`);
-    root.style.setProperty('--my', `${e.clientY}px`);
   }, { passive: true });
 
   /* ---------- header y menú ---------- */
@@ -119,38 +137,14 @@
   $$('a', menu).forEach((a) => a.addEventListener('click', () => setMenu(false)));
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && menuOpen) setMenu(false); });
 
-  /* ---------- manifiesto palabra por palabra ---------- */
-  const manifesto = $('[data-words]');
-  let words = [];
-  if (manifesto) {
-    const split = (node) => {
-      Array.from(node.childNodes).forEach((n) => {
-        if (n.nodeType === 3) {
-          const frag = document.createDocumentFragment();
-          n.textContent.split(/(\s+)/).forEach((tok) => {
-            if (!tok) return;
-            if (/^\s+$/.test(tok)) frag.appendChild(document.createTextNode(tok));
-            else {
-              const s = document.createElement('span');
-              s.className = 'w';
-              s.textContent = tok;
-              frag.appendChild(s);
-            }
-          });
-          n.replaceWith(frag);
-        } else if (n.nodeType === 1) split(n);
-      });
-    };
-    split(manifesto);
-    words = $$('.w', manifesto);
-  }
-
   /* ---------- juegos: portal de la luna + zonas ---------- */
   const games = $('#juegos');
   const stage = $('[data-feature]');
   const portalG = $('[data-portal]');
   const ringG = $('[data-portal-ring]');
   const intro = $('[data-portal-intro]');
+  const waveG = $('[data-portal-wave]');
+  const bloom = $('[data-portal-bloom]');
   const neon = $('[data-neon]');
   const tabs = $$('.tab', stage);
   const scene = scenes.get($('.games__canvas', stage));
@@ -179,10 +173,13 @@
     if (strip.scrollWidth > strip.clientWidth) strip.scrollTo({ left: tabs[i].offsetLeft - 16, behavior: 'smooth' });
     stage.classList.add('is-switching');
     clearTimeout(swapTimer);
+    stage.classList.remove('is-switching');
+    void stage.offsetWidth;
+    stage.classList.add('is-switching');
     swapTimer = setTimeout(() => {
       if (scene) scene.set(tabs[i].dataset.zone);
-      stage.classList.remove('is-switching');
-    }, reduceMotion ? 0 : 280);
+      setTimeout(() => stage.classList.remove('is-switching'), 330);
+    }, reduceMotion ? 0 : 290);
   }
   tabs.forEach((t, i) => {
     t.tabIndex = i === current ? 0 : -1;
@@ -214,6 +211,12 @@
     portalG.setAttribute('transform', tf);
     ringG.setAttribute('transform', tf);
     ringG.style.opacity = String(clamp(1 - eased * 4, 0, 1));
+    // onda expansiva que se adelanta al portal
+    const ws = Math.pow(110, clamp(eased * 1.6, 0, 1)) * 1.08;
+    waveG.setAttribute('transform', `translate(42 55) scale(${ws.toFixed(4)}) translate(-42 -55)`);
+    waveG.style.opacity = String(q > 0.01 ? clamp(0.9 - eased * 2.2, 0, 1) : 0);
+    // destello al cruzar
+    bloom.style.opacity = (Math.exp(-Math.pow((eased - 0.72) / 0.09, 2)) * 0.55).toFixed(3);
     intro.style.opacity = String(clamp(1 - q * 5, 0, 1));
     const ui = clamp((p - 0.62) / 0.14, 0, 1);
     stage.style.setProperty('--zoom', (1.35 - 0.35 * eased).toFixed(4));
@@ -232,6 +235,19 @@
     else if (r.bottom > vh) openness = 0.08 + 0.92 * eased;
     else openness = 0.3 + 0.7 * clamp(r.bottom / vh, 0, 1);
     if (audio) audio.setOpenness(openness);
+  }
+
+  /* ---------- DEVELOPING FANTASY ---------- */
+  const fantasy = $('#estudio');
+  const fStage = $('[data-fantasy]');
+  function updateFantasy(vh) {
+    const r = fantasy.getBoundingClientRect();
+    const span = fantasy.offsetHeight - vh;
+    const p = clamp(span > 0 ? -r.top / span : 0, 0, 1);
+    const q = clamp(p / 0.6, 0, 1);
+    const e = 1 - Math.pow(1 - q, 3);
+    fStage.style.setProperty('--fs', (4.2 - 3.2 * e).toFixed(4));
+    fStage.style.setProperty('--fsub', clamp((p - 0.55) / 0.2, 0, 1).toFixed(3));
   }
 
   /* ---------- scroll maestro ---------- */
@@ -263,12 +279,7 @@
     if (!reduceMotion) updatePortal(vh);
     else if (audio) audio.setOpenness(0.6);
 
-    if (words.length && !reduceMotion) {
-      const r = manifesto.getBoundingClientRect();
-      const p = clamp((vh * 0.9 - r.top) / (r.height + vh * 0.3), 0, 1);
-      const lit = Math.round(p * words.length * 1.15);
-      words.forEach((w, i) => w.classList.toggle('on', i < lit));
-    }
+    if (!reduceMotion) updateFantasy(vh);
     ticking = false;
   }
   window.addEventListener('scroll', () => {
@@ -279,6 +290,70 @@
   }, { passive: true });
   window.addEventListener('resize', onScroll);
   onScroll();
+
+  /* ---------- texto que se revuelve al pasar el mouse ---------- */
+  const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  $$('[data-scramble]').forEach((el) => {
+    const node = Array.from(el.childNodes).find((n) => n.nodeType === 3 && n.textContent.trim());
+    if (!node) return;
+    const original = node.textContent;
+    let raf = null;
+    const run = () => {
+      if (reduceMotion) return;
+      cancelAnimationFrame(raf);
+      const t0 = performance.now();
+      const step = (now) => {
+        const k = (now - t0) / 380;
+        node.textContent = original.split('').map((c, i) => {
+          if (c === ' ' || i < k * original.length) return c;
+          return GLYPHS[(Math.random() * GLYPHS.length) | 0];
+        }).join('');
+        if (k < 1) raf = requestAnimationFrame(step);
+        else node.textContent = original;
+      };
+      raf = requestAnimationFrame(step);
+    };
+    (el.closest('a, button') || el).addEventListener('pointerenter', run);
+  });
+
+  /* ---------- botones magnéticos y luz del cursor ---------- */
+  const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  if (fine && !reduceMotion) {
+    $$('[data-magnetic]').forEach((el) => {
+      el.addEventListener('pointermove', (e) => {
+        const r = el.getBoundingClientRect();
+        el.style.setProperty('--tx', `${(e.clientX - r.left - r.width / 2) * 0.25}px`);
+        el.style.setProperty('--ty', `${(e.clientY - r.top - r.height / 2) * 0.35}px`);
+      });
+      el.addEventListener('pointerleave', () => {
+        el.style.setProperty('--tx', '0px');
+        el.style.setProperty('--ty', '0px');
+      });
+    });
+    let sx = -999, sy = -999, tx = -999, ty = -999;
+    window.addEventListener('pointermove', (e) => { tx = e.clientX; ty = e.clientY; if (sx < -900) { sx = tx; sy = ty; } }, { passive: true });
+    (function follow() {
+      sx += (tx - sx) * 0.12;
+      sy += (ty - sy) * 0.12;
+      root.style.setProperty('--sx', `${sx.toFixed(1)}px`);
+      root.style.setProperty('--sy', `${sy.toFixed(1)}px`);
+      requestAnimationFrame(follow);
+    })();
+  }
+
+  /* ---------- "Hablemos" letra por letra ---------- */
+  const letters = $('[data-letters]');
+  if (letters) {
+    if (hasIO && !reduceMotion) {
+      const io = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+          letters.classList.add('is-in');
+          io.disconnect();
+        }
+      }, { threshold: 0.3 });
+      io.observe(letters);
+    } else letters.classList.add('is-in');
+  }
 
   /* ---------- nav activa ---------- */
   const navLinks = $$('.nav a');

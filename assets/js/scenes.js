@@ -934,7 +934,50 @@
     });
   }
 
-  const RENDERERS = { hero, entrada, pista, barra, vip, terraza };
+  /* ---------- DEVELOPING FANTASY: luz que fluye detrás de las letras ---------- */
+
+  function fantasy(ctx, w, h, t, S) {
+    const pulse = TE.pulse();
+    ctx.fillStyle = linear(ctx, 0, 0, w, h, [[0, '#0b2260'], [0.5, '#123c8e'], [1, '#0a1f57']]);
+    ctx.fillRect(0, 0, w, h);
+    const big = Math.max(w, h);
+    ctx.globalCompositeOperation = 'lighter';
+    const blobs = [
+      ['69,243,255', 0.25, 0.35, 0.22, 0.25, 0.21, 0.55],
+      ['255,79,180', 0.75, 0.6, 0.2, 0.22, 0.17, 0.5],
+      ['90,120,255', 0.5, 0.5, 0.3, 0.3, 0.12, 0.6],
+      ['69,243,255', 0.8, 0.2, 0.18, 0.2, 0.25, 0.4],
+      ['180,110,255', 0.2, 0.8, 0.2, 0.15, 0.19, 0.45],
+    ];
+    blobs.forEach((b, i) => {
+      const x = w * (b[1] + b[3] * Math.sin(t * b[5] + i * 1.7));
+      const y = h * (b[2] + b[4] * Math.cos(t * b[5] * 1.3 + i * 2.3));
+      glow(ctx, x, y, big * b[6] * (1 + pulse * 0.1), b[0], 0.55 + pulse * 0.15);
+    });
+    // listones de luz
+    for (let k = 0; k < 3; k++) {
+      const base = h * (0.28 + k * 0.22);
+      const path = () => {
+        ctx.beginPath();
+        for (let x = -20; x <= w + 20; x += 12) {
+          const y = base + Math.sin(x * 0.0035 + t * (0.5 + k * 0.15) + k * 2) * h * 0.09 + Math.sin(x * 0.009 - t * 0.8 + k) * h * 0.025;
+          x < 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        }
+      };
+      path();
+      ctx.strokeStyle = 'rgba(160,230,255,0.10)';
+      ctx.lineWidth = h * 0.06;
+      ctx.stroke();
+      path();
+      ctx.strokeStyle = `rgba(230,250,255,${0.35 + pulse * 0.3})`;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+    drawStars(ctx, S, w, h, t, h, 1800);
+  }
+
+  const RENDERERS = { hero, fantasy, entrada, pista, barra, vip, terraza };
 
   /* ---------- motor: un canvas = una escena ---------- */
 

@@ -274,6 +274,42 @@
       }, 600);
     },
 
+    // Golpe de entrada: bajo profundo + barrido de aire, sin pasar por el filtro
+    sting() {
+      if (!this.ctx) return;
+      const ctx = this.ctx;
+      const t = ctx.currentTime + 0.02;
+      const out = ctx.createGain();
+      out.gain.value = 0.9;
+      out.connect(ctx.destination);
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(90, t);
+      o.frequency.exponentialRampToValueAtTime(28, t + 1.4);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.9, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 1.8);
+      o.connect(g).connect(out);
+      o.start(t);
+      o.stop(t + 1.9);
+      const n = ctx.createBufferSource();
+      n.buffer = this.noise;
+      n.loop = true;
+      const f = ctx.createBiquadFilter();
+      f.type = 'bandpass';
+      f.Q.value = 1.2;
+      f.frequency.setValueAtTime(6000, t);
+      f.frequency.exponentialRampToValueAtTime(300, t + 1.2);
+      const ng = ctx.createGain();
+      ng.gain.setValueAtTime(0.0001, t);
+      ng.gain.exponentialRampToValueAtTime(0.25, t + 0.05);
+      ng.gain.exponentialRampToValueAtTime(0.0001, t + 1.3);
+      n.connect(f).connect(ng).connect(out);
+      n.start(t);
+      n.stop(t + 1.4);
+    },
+
     // 0 = afuera (apagado, sólo el bombo atraviesa la pared) · 1 = en la pista
     setOpenness(x, force) {
       x = Math.max(0, Math.min(1, x));
