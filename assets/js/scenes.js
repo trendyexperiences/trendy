@@ -1018,7 +1018,7 @@
     resize() {
       const r = this.c.getBoundingClientRect();
       if (!r.width || !r.height) return;
-      const dpr = Math.min(window.devicePixelRatio || 1, this.opts.maxDpr || 1.75);
+      const dpr = Math.min(window.devicePixelRatio || 1, this.opts.maxDpr || 1.75) * (this.quality || 1);
       this.c.width = Math.round(r.width * dpr);
       this.c.height = Math.round(r.height * dpr);
       this.w = r.width;
@@ -1045,6 +1045,21 @@
 
     loop(now) {
       if (!this.visible || document.hidden) return;
+      // Calidad adaptativa: si los cuadros tardan, baja la resolución del canvas
+      if (this.last) {
+        const dt = now - this.last;
+        if (dt < 200) {
+          this.avg = this.avg ? this.avg * 0.92 + dt * 0.08 : dt;
+          this.frames = (this.frames || 0) + 1;
+          if (this.frames > 45 && this.avg > 24 && (this.quality || 1) > 0.55) {
+            this.quality = (this.quality || 1) * 0.8;
+            this.frames = 0;
+            this.avg = 0;
+            this.resize();
+          }
+        }
+      }
+      this.last = now;
       this.draw(now);
       this.raf = requestAnimationFrame(this.loop);
     }

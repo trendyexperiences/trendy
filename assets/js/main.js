@@ -40,7 +40,9 @@
   /* ---------- escenas ---------- */
   const scenes = new Map();
   if (TE.mountScene) {
-    $$('canvas[data-scene]').forEach((c) => scenes.set(c, TE.mountScene(c, c.dataset.scene, { maxDpr: 1.5 })));
+    // Resolución por escena: la luz difusa de "fantasy" no necesita nitidez
+    const DPR = { hero: 1.25, fantasy: 0.6 };
+    $$('canvas[data-scene]').forEach((c) => scenes.set(c, TE.mountScene(c, c.dataset.scene, { maxDpr: DPR[c.dataset.scene] || 1.1 })));
   }
 
   /* ---------- sonido ---------- */
@@ -57,15 +59,27 @@
     soundBtn.classList.toggle('is-on', soundOn);
     soundBtn.setAttribute('aria-pressed', String(soundOn));
     soundState.textContent = soundOn ? 'On' : 'Off';
+    startPulse();
     onScroll();
   }
   soundBtn.addEventListener('click', () => setSound(!soundOn));
 
-  // El ritmo pinta la página (variable --pulse)
-  (function pulseLoop() {
-    root.style.setProperty('--pulse', soundOn && TE.pulse ? TE.pulse().toFixed(3) : '0');
+  // El ritmo pinta solo los elementos que lo usan (nunca :root, para no recalcular toda la página)
+  const pulseEls = $$('.hero__glow, .sound, .play');
+  let pulseRunning = false;
+  function pulseLoop() {
+    if (!soundOn) {
+      pulseEls.forEach((el) => el.style.setProperty('--pulse', '0'));
+      pulseRunning = false;
+      return;
+    }
+    const v = TE.pulse ? TE.pulse().toFixed(2) : '0';
+    pulseEls.forEach((el) => el.style.setProperty('--pulse', v));
     requestAnimationFrame(pulseLoop);
-  })();
+  }
+  function startPulse() {
+    if (!pulseRunning) { pulseRunning = true; requestAnimationFrame(pulseLoop); }
+  }
 
   /* ---------- puerta de entrada ---------- */
   const gate = $('[data-gate]');
@@ -299,14 +313,18 @@
 
   /* ---------- inclinación según la velocidad del scroll ---------- */
   if (!reduceMotion && skewEls.length) {
-    let skew = 0;
-    (function skewLoop() {
+    // Solo corre mientras hay movimiento; en reposo no toca el DOM
+    let skew = 0, skewing = false;
+    function skewLoop() {
       skew += (clamp(velocity * 0.035, -3, 3) - skew) * 0.12;
       velocity *= 0.85;
-      const v = Math.abs(skew) < 0.01 ? 0 : skew;
-      skewEls.forEach((el) => { el.style.transform = v ? `skewY(${v.toFixed(3)}deg)` : ''; });
-      requestAnimationFrame(skewLoop);
-    })();
+      const idle = Math.abs(skew) < 0.01 && Math.abs(velocity) < 0.5;
+      skewEls.forEach((el) => { el.style.transform = idle ? '' : `skewY(${skew.toFixed(3)}deg)`; });
+      if (idle) { skew = 0; skewing = false; } else requestAnimationFrame(skewLoop);
+    }
+    window.addEventListener('scroll', () => {
+      if (!skewing) { skewing = true; requestAnimationFrame(skewLoop); }
+    }, { passive: true });
   }
 
   /* ---------- sonidos de interfaz ---------- */
@@ -431,15 +449,21 @@
         el.style.setProperty('--ty', '0px');
       });
     });
-    let sx = -999, sy = -999, tx = -999, ty = -999;
-    window.addEventListener('pointermove', (e) => { tx = e.clientX; ty = e.clientY; if (sx < -900) { sx = tx; sy = ty; } }, { passive: true });
-    (function follow() {
-      sx += (tx - sx) * 0.12;
-      sy += (ty - sy) * 0.12;
-      root.style.setProperty('--sx', `${sx.toFixed(1)}px`);
-      root.style.setProperty('--sy', `${sy.toFixed(1)}px`);
-      requestAnimationFrame(follow);
-    })();
+    // Luz del cursor: se mueve con transform directo y se duerme cuando llega a su destino
+    const spot = $('.spot');
+    let sx = -999, sy = -999, tx = -999, ty = -999, following = false;
+    function follow() {
+      sx += (tx - sx) * 0.14;
+      sy += (ty - sy) * 0.14;
+      spot.style.transform = `translate3d(${sx.toFixed(1)}px, ${sy.toFixed(1)}px, 0)`;
+      if (Math.abs(tx - sx) + Math.abs(ty - sy) > 0.5) requestAnimationFrame(follow);
+      else following = false;
+    }
+    window.addEventListener('pointermove', (e) => {
+      tx = e.clientX; ty = e.clientY;
+      if (sx < -900) { sx = tx; sy = ty; }
+      if (!following) { following = true; requestAnimationFrame(follow); }
+    }, { passive: true });
   }
 
   /* ---------- "Hablemos" letra por letra ---------- */
