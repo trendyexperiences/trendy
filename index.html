@@ -54,6 +54,10 @@
         Entrar con sonido
       </button>
       <button class="gate__mute" type="button" data-enter="mute">Entrar sin sonido</button>
+      <p class="gate__hint">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13a8 8 0 0 1 16 0v4a2 2 0 0 1-2 2h-1v-6h3M4 13v4a2 2 0 0 0 2 2h1v-6H4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Mejor con audífonos
+      </p>
     </div>
   </div>
 </div>
@@ -83,6 +87,13 @@
     <button class="burger" type="button" aria-expanded="false" aria-controls="menu" aria-label="Abrir menú"><span></span><span></span></button>
   </div>
 </header>
+
+<nav class="hud" aria-label="Secciones">
+  <a href="#inicio" data-hud="inicio"><b>Inicio</b><span>01</span></a>
+  <a href="#juegos" data-hud="juegos"><b>Juegos</b><span>02</span></a>
+  <a href="#estudio" data-hud="estudio"><b>Estudio</b><span>03</span></a>
+  <a href="#contacto" data-hud="contacto"><b>Contacto</b><span>04</span></a>
+</nav>
 
 <div class="menu" id="menu" hidden>
   <nav class="menu__nav" aria-label="Menú">
@@ -143,6 +154,7 @@
 
     <div class="games__bloom" data-portal-bloom aria-hidden="true"></div>
     <div class="games__intro" data-portal-intro>
+      <span class="frame-corners" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
       <p class="eyebrow"><span class="dot"></span>Juegos</p>
       <p class="games__hint">Desliza para entrar</p>
     </div>
@@ -188,6 +200,11 @@
     </div>
     <p class="eyebrow fantasy__eyebrow"><span class="dot"></span>El estudio</p>
     <p class="fantasy__sub">Trendy Experiences · Estudio de videojuegos</p>
+    <svg class="badge" viewBox="0 0 200 200" aria-hidden="true">
+      <defs><path id="badge-path" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/></defs>
+      <text><textPath href="#badge-path">DEVELOPING FANTASY · TRENDY EXPERIENCES · </textPath></text>
+      <use href="#te-mark" x="72" y="72" width="56" height="56"/>
+    </svg>
   </div>
 </section>
 

@@ -41,13 +41,14 @@
   const scenes = new Map();
   if (TE.mountScene) {
     // Resolución por escena: la luz difusa de "fantasy" no necesita nitidez
-    const DPR = { hero: 1.25, fantasy: 0.6 };
+    const DPR = { hero: 1.25, fantasy: 1.25 };
     $$('canvas[data-scene]').forEach((c) => scenes.set(c, TE.mountScene(c, c.dataset.scene, { maxDpr: DPR[c.dataset.scene] || 1.1 })));
   }
 
   /* ---------- sonido ---------- */
   const soundBtn = $('[data-sound]');
   const soundState = $('[data-sound-state]');
+  let lastPlace = '';
   let soundOn = false;
   async function setSound(on) {
     if (!audio) return;
@@ -58,6 +59,7 @@
     }
     soundBtn.classList.toggle('is-on', soundOn);
     soundBtn.setAttribute('aria-pressed', String(soundOn));
+    lastPlace = '';
     soundState.textContent = soundOn ? 'On' : 'Off';
     startPulse();
     onScroll();
@@ -65,7 +67,7 @@
   soundBtn.addEventListener('click', () => setSound(!soundOn));
 
   // El ritmo pinta solo los elementos que lo usan (nunca :root, para no recalcular toda la página)
-  const pulseEls = $$('.hero__glow, .sound, .play');
+  const pulseEls = $$('.hero__glow');
   let pulseRunning = false;
   function pulseLoop() {
     if (!soundOn) {
@@ -217,9 +219,10 @@
   }
   syncPause();
 
-  function updatePortal(vh) {
-    const r = games.getBoundingClientRect();
-    const span = games.offsetHeight - vh;
+  function updatePortal(y, vh) {
+    const L = layout.games;
+    const r = { top: L.top - y, bottom: L.top - y + L.h };
+    const span = L.h - vh;
     const p = clamp(span > 0 ? -r.top / span : 0, 0, 1);
     const q = clamp((p - 0.06) / 0.58, 0, 1);
     const eased = q * q * (3 - 2 * q);
@@ -252,18 +255,22 @@
     else if (r.bottom > vh) openness = 0.08 + 0.92 * eased;
     else openness = 0.3 + 0.7 * clamp(r.bottom / vh, 0, 1);
     if (audio) audio.setOpenness(openness);
+    // el botón cuenta dónde estás: afuera del antro o adentro
+    const place = soundOn ? (openness > 0.5 ? 'Adentro' : 'Afuera') : 'Off';
+    if (place !== lastPlace) { soundState.textContent = place; lastPlace = place; }
   }
 
   /* ---------- DEVELOPING FANTASY ---------- */
   const fantasy = $('#estudio');
   const fStage = $('[data-fantasy]');
-  function updateFantasy(vh) {
-    const r = fantasy.getBoundingClientRect();
-    const span = fantasy.offsetHeight - vh;
-    const p = clamp(span > 0 ? -r.top / span : 0, 0, 1);
+  function updateFantasy(y, vh) {
+    const L = layout.fantasy;
+    const span = L.h - vh;
+    const p = clamp(span > 0 ? (y - L.top) / span : 0, 0, 1);
     const q = clamp(p / 0.6, 0, 1);
     const e = 1 - Math.pow(1 - q, 3);
-    fStage.style.setProperty('--fs', (4.2 - 3.2 * e).toFixed(4));
+    TE.fantasyScale = 4.2 - 3.2 * e;
+    fStage.style.setProperty('--fs', TE.fantasyScale.toFixed(4));
     fStage.style.setProperty('--fsub', clamp((p - 0.55) / 0.2, 0, 1).toFixed(3));
   }
 
@@ -275,10 +282,20 @@
   let ticking = false;
   let velocity = 0;
   const skewEls = $$('[data-skew]');
+  // Medidas de la página en caché: el scroll solo lee scrollY y nunca fuerza un recálculo del diseño
+  const layout = { vh: window.innerHeight, docH: 1, games: { top: 0, h: 1 }, fantasy: { top: 0, h: 1 } };
+  function measure() {
+    const y = window.scrollY;
+    layout.vh = window.innerHeight;
+    layout.docH = document.documentElement.scrollHeight - layout.vh;
+    layout.games = { top: games.getBoundingClientRect().top + y, h: games.offsetHeight };
+    layout.fantasy = { top: fantasy.getBoundingClientRect().top + y, h: fantasy.offsetHeight };
+  }
+
   function onScroll() {
     const y = window.scrollY;
-    const vh = window.innerHeight;
-    const docH = document.documentElement.scrollHeight - vh;
+    const vh = layout.vh;
+    const docH = layout.docH;
     progress.style.transform = `scaleX(${docH > 0 ? y / docH : 0})`;
 
     header.classList.toggle('is-scrolled', y > 40);
@@ -296,10 +313,10 @@
       lines[1].style.transform = `translate3d(${y * 0.35}px, 0, 0)`;
     }
 
-    if (!reduceMotion) updatePortal(vh);
+    if (!reduceMotion) updatePortal(y, vh);
     else if (audio) audio.setOpenness(0.6);
 
-    if (!reduceMotion) updateFantasy(vh);
+    if (!reduceMotion) updateFantasy(y, vh);
     ticking = false;
   }
   window.addEventListener('scroll', () => {
@@ -308,7 +325,11 @@
       requestAnimationFrame(onScroll);
     }
   }, { passive: true });
-  window.addEventListener('resize', onScroll);
+  const remeasure = () => { measure(); onScroll(); };
+  window.addEventListener('resize', remeasure);
+  if ('ResizeObserver' in window) new ResizeObserver(remeasure).observe(document.body);
+  (document.fonts ? document.fonts.ready : Promise.resolve()).then(remeasure);
+  measure();
   onScroll();
 
   /* ---------- inclinación según la velocidad del scroll ---------- */
@@ -482,6 +503,7 @@
 
   /* ---------- nav activa ---------- */
   const navLinks = $$('.nav a');
+  const hudLinks = $$('[data-hud]');
   if (hasIO) {
     const map = new Map(navLinks.map((a) => [a.getAttribute('href').slice(1), a]));
     const io = new IntersectionObserver((entries) => {
@@ -489,6 +511,7 @@
         if (!e.isIntersecting) return;
         const a = map.get(e.target.id);
         navLinks.forEach((l) => l.classList.toggle('is-active', l === a));
+        hudLinks.forEach((l) => l.classList.toggle('is-active', l.dataset.hud === e.target.id));
       });
     }, { rootMargin: '-45% 0px -50% 0px' });
     $$('main > section[id]').forEach((el) => io.observe(el));
