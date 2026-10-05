@@ -2,9 +2,9 @@
 
 Sitio oficial de **Trendy Experiences**, estudio de videojuegos con estética *Tropical Azul Nocturna*, y de su primer juego, **EL CLUB**.
 
-Es un sitio estático: HTML, CSS y JavaScript sin dependencias ni paso de build. Todo el arte (la costa de noche y las zonas de EL CLUB) se dibuja en vivo con `<canvas>`, así que no hay imágenes externas.
+Es un sitio estático: HTML, CSS y JavaScript sin dependencias ni paso de build. Todo el arte se dibuja en vivo con `<canvas>` y la música se sintetiza en el navegador con Web Audio, así que no hay imágenes ni audios externos.
 
-Secciones: **Inicio** (Trendy Experiences) · **Juegos** (EL CLUB con sus cinco zonas) · **Estudio** · **Contacto**.
+Recorrido: **Entrada** (con o sin sonido) · **Inicio** (Trendy Experiences) · **Juegos** (zoom a través de la luna del logo hacia EL CLUB y sus cinco zonas) · **Estudio** · **Contacto**.
 
 ## Verlo en local
 
@@ -21,9 +21,9 @@ Abre `http://localhost:3000` (o el puerto que indique).
 | `index.html` | Contenido y secciones del sitio |
 | `assets/css/styles.css` | Paleta, tipografía y todos los estilos |
 | `assets/js/scenes.js` | Escenas animadas en canvas (costa del inicio y las 5 zonas de EL CLUB) |
-| `assets/js/main.js` | Menú, entrada del hero, zonas con autoplay, manifiesto, copiar correo |
+| `assets/js/audio.js` | Groove house tropical a 122 BPM; suena apagado "desde afuera" y se abre al cruzar la luna |
+| `assets/js/main.js` | Puerta de entrada, portal de la luna, zonas con autoplay, menú, manifiesto, copiar correo |
 
-## Antes de publicar
+## Contacto
 
-- **Correo de contacto**: `hola@trendyexperiences.com` es provisional. Reemplázalo en `index.html` (aparece en la sección Contacto).
-- **Redes sociales**: cuando existan, se pueden agregar al footer.
+El correo del sitio es `trendyexperiences@gmail.com` (sección Contacto de `index.html`).

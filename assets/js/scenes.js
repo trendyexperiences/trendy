@@ -13,6 +13,7 @@
   const TE = (window.TE = window.TE || {});
   TE.pointer = TE.pointer || { x: 0, y: 0 };
   TE.beat = function () {
+    if (window.ClubAudio && window.ClubAudio.running) return window.ClubAudio.phase();
     return ((performance.now() / 1000) * (BPM / 60)) % 1;
   };
   TE.pulse = function () {
@@ -285,6 +286,13 @@
     const moonY = h * (portrait ? 0.2 : 0.25) + my * -8;
     const moonR = unit * (portrait ? 0.085 : 0.07);
     drawMoon(ctx, moonX, moonY, moonR);
+    // con música, la noche late
+    if (window.ClubAudio && window.ClubAudio.running) {
+      const pl = TE.pulse();
+      ctx.globalCompositeOperation = 'lighter';
+      glow(ctx, moonX, moonY, moonR * (3 + pl * 2), '120,190,255', 0.12 * pl);
+      ctx.globalCompositeOperation = 'source-over';
+    }
 
     if (!S.clouds) {
       const R = rng(11);
