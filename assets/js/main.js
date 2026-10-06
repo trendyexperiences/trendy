@@ -167,6 +167,8 @@
   if (scene && !reduceMotion) scene.post = TE.drawPortal;
   let current = tabs.findIndex((t) => t.classList.contains('is-active'));
   const zoneNo = $('[data-zone-no]');
+  const meter = $('[data-portal-meter]');
+  const meterWrap = $('[data-portal-meter-wrap]');
   let stageOpen = reduceMotion;
   let hovering = false;
   let swapTimer = null;
@@ -185,7 +187,15 @@
     void bar.offsetWidth;
     bar.style.animation = '';
     if (focus) tabs[i].focus({ preventScroll: true });
-    if (zoneNo) zoneNo.textContent = String(i + 1).padStart(2, '0');
+    if (zoneNo) {
+      const next = String(i + 1).padStart(2, '0');
+      if (zoneNo.textContent !== next) {
+        zoneNo.textContent = next;
+        zoneNo.classList.remove('roll');
+        void zoneNo.offsetWidth;
+        zoneNo.classList.add('roll');
+      }
+    }
     if (i === current) return;
     current = i;
     const strip = tabs[i].parentElement;
@@ -234,6 +244,10 @@
     // destello al cruzar
     bloom.style.opacity = (Math.exp(-Math.pow((eased - 0.72) / 0.09, 2)) * 0.55).toFixed(3);
     intro.style.opacity = String(clamp(1 - q * 5, 0, 1));
+    if (meter) {
+      meter.style.transform = `scaleX(${Math.min(1, q * 1.1).toFixed(3)})`;
+      meterWrap.style.opacity = String(clamp((0.98 - q) * 8, 0, 1).toFixed(3));
+    }
     const ui = clamp((p - 0.62) / 0.14, 0, 1);
     stage.style.setProperty('--zoom', (1.35 - 0.35 * eased).toFixed(4));
     stage.style.setProperty('--ui', ui.toFixed(3));
@@ -573,6 +587,52 @@
 
   /* ---------- nav activa ---------- */
   const navLinks = $$('.nav a');
+
+  /* ---------- subrayado que se desliza entre opciones del menú ---------- */
+  const nav = $('.nav');
+  const pill = $('.nav__pill');
+  if (nav && pill) {
+    nav.classList.add('has-pill');
+    const moveTo = (a) => {
+      if (!a) { nav.style.setProperty('--po', '0'); return; }
+      nav.style.setProperty('--px', `${a.offsetLeft}px`);
+      nav.style.setProperty('--pw', String(a.offsetWidth / 10));
+      nav.style.setProperty('--po', '1');
+    };
+    const active = () => navLinks.find((l) => l.classList.contains('is-active'));
+    navLinks.forEach((a) => a.addEventListener('pointerenter', () => moveTo(a)));
+    nav.addEventListener('pointerleave', () => moveTo(active()));
+    new MutationObserver(() => { if (!nav.matches(':hover')) moveTo(active()); })
+      .observe(nav, { subtree: true, attributes: true, attributeFilter: ['class'] });
+    (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => moveTo(active()));
+  }
+
+  /* ---------- EL CLUB: profundidad con el mouse y deslizar entre zonas ---------- */
+  if (!reduceMotion) {
+    stage.addEventListener('pointermove', (e) => {
+      if (!stage.classList.contains('is-open') || e.pointerType !== 'mouse') return;
+      const r = stage.getBoundingClientRect();
+      const nx = (e.clientX - r.left) / r.width - 0.5, ny = (e.clientY - r.top) / r.height - 0.5;
+      stage.style.setProperty('--gx', `${(-nx * 22).toFixed(1)}px`);
+      stage.style.setProperty('--gy', `${(-ny * 14).toFixed(1)}px`);
+    });
+    stage.addEventListener('pointerleave', () => {
+      stage.style.setProperty('--gx', '0px');
+      stage.style.setProperty('--gy', '0px');
+    });
+  }
+  let touchX = null, touchY = null;
+  stage.addEventListener('touchstart', (e) => {
+    if (e.target.closest('.tabs')) return;
+    touchX = e.touches[0].clientX;
+    touchY = e.touches[0].clientY;
+  }, { passive: true });
+  stage.addEventListener('touchend', (e) => {
+    if (touchX === null || !stage.classList.contains('is-open')) return;
+    const dx = e.changedTouches[0].clientX - touchX, dy = e.changedTouches[0].clientY - touchY;
+    touchX = null;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) select(current + (dx < 0 ? 1 : -1));
+  }, { passive: true });
   const hudLinks = $$('[data-hud]');
   if (hasIO) {
     const map = new Map(navLinks.map((a) => [a.getAttribute('href').slice(1), a]));
