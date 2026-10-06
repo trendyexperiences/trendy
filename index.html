@@ -65,7 +65,7 @@
 <div class="grain" aria-hidden="true"></div>
 <div class="progress" aria-hidden="true"><span></span></div>
 <div class="spot" aria-hidden="true"></div>
-<canvas class="sparkles" aria-hidden="true"></canvas>
+<canvas class="sparkles" aria-hidden="true" hidden></canvas>
 
 <!-- ============ HEADER ============ -->
 <header class="header">
@@ -135,22 +135,6 @@
     </div>
     <div class="games__flash" aria-hidden="true"></div>
     <div class="games__shade" aria-hidden="true"></div>
-
-    <svg class="portal" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-      <defs>
-        <mask id="portal-mask" maskUnits="userSpaceOnUse" x="-100" y="-100" width="300" height="300">
-          <rect x="-100" y="-100" width="300" height="300" fill="#fff"/>
-          <g data-portal><path d="M61.781 52.281A12 12 0 1 1 47.719 38.219A10 10 0 0 0 61.781 52.281Z" fill="#000"/></g>
-        </mask>
-      </defs>
-      <rect x="-100" y="-100" width="300" height="300" fill="#030817" mask="url(#portal-mask)"/>
-      <g data-portal-wave class="portal__ring portal__ring--wave">
-        <path d="M61.781 52.281A12 12 0 1 1 47.719 38.219A10 10 0 0 0 61.781 52.281Z" fill="none" vector-effect="non-scaling-stroke"/>
-      </g>
-      <g data-portal-ring class="portal__ring">
-        <path d="M61.781 52.281A12 12 0 1 1 47.719 38.219A10 10 0 0 0 61.781 52.281Z" fill="none" vector-effect="non-scaling-stroke"/>
-      </g>
-    </svg>
 
     <div class="games__bloom" data-portal-bloom aria-hidden="true"></div>
     <div class="games__intro" data-portal-intro>

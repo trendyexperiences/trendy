@@ -157,14 +157,12 @@
   /* ---------- juegos: portal de la luna + zonas ---------- */
   const games = $('#juegos');
   const stage = $('[data-feature]');
-  const portalG = $('[data-portal]');
-  const ringG = $('[data-portal-ring]');
   const intro = $('[data-portal-intro]');
-  const waveG = $('[data-portal-wave]');
   const bloom = $('[data-portal-bloom]');
   const neon = $('[data-neon]');
   const tabs = $$('.tab', stage);
   const scene = scenes.get($('.games__canvas', stage));
+  if (scene && !reduceMotion) scene.post = TE.drawPortal;
   let current = tabs.findIndex((t) => t.classList.contains('is-active'));
   const zoneNo = $('[data-zone-no]');
   let stageOpen = reduceMotion;
@@ -227,14 +225,10 @@
     const q = clamp((p - 0.06) / 0.58, 0, 1);
     const eased = q * q * (3 - 2 * q);
     const s = Math.pow(110, eased);
-    const tf = `translate(42 55) scale(${s.toFixed(4)}) translate(-42 -55)`;
-    portalG.setAttribute('transform', tf);
-    ringG.setAttribute('transform', tf);
-    ringG.style.opacity = String(clamp(1 - eased * 4, 0, 1));
+    const ringA = clamp(1 - eased * 4, 0, 1);
     // onda expansiva que se adelanta al portal
     const ws = Math.pow(110, clamp(eased * 1.6, 0, 1)) * 1.08;
-    waveG.setAttribute('transform', `translate(42 55) scale(${ws.toFixed(4)}) translate(-42 -55)`);
-    waveG.style.opacity = String(q > 0.01 ? clamp(0.9 - eased * 2.2, 0, 1) : 0);
+    TE.portal = { s, ws, ring: ringA, wave: q > 0.01 ? clamp(0.9 - eased * 2.2, 0, 1) : 0, zoom: 1.35 - 0.35 * eased };
     // destello al cruzar
     bloom.style.opacity = (Math.exp(-Math.pow((eased - 0.72) / 0.09, 2)) * 0.55).toFixed(3);
     intro.style.opacity = String(clamp(1 - q * 5, 0, 1));
@@ -392,7 +386,7 @@
           });
         }
         if (parts.length > 160) parts.splice(0, parts.length - 160);
-        if (!running && parts.length) { running = true; requestAnimationFrame(draw); }
+        if (!running && parts.length) { running = true; sparkCanvas.hidden = false; requestAnimationFrame(draw); }
       }
       px = e.clientX; py = e.clientY;
     }, { passive: true });
@@ -419,7 +413,7 @@
         star(p.x, p.y, p.r * (0.5 + k) * 1.6, p.rot);
       }
       if (parts.length) requestAnimationFrame(draw);
-      else { running = false; sctx.clearRect(0, 0, sw, sh); }
+      else { running = false; sctx.clearRect(0, 0, sw, sh); sparkCanvas.hidden = true; }
     }
     window.addEventListener('pointerdown', (e) => {
       const r = document.createElement('span');
@@ -472,6 +466,8 @@
     });
     // Luz del cursor: se mueve con transform directo y se duerme cuando llega a su destino
     const spot = $('.spot');
+    spot.hidden = true;
+    document.addEventListener('pointerleave', () => { spot.hidden = true; });
     let sx = -999, sy = -999, tx = -999, ty = -999, following = false;
     function follow() {
       sx += (tx - sx) * 0.14;
@@ -483,6 +479,7 @@
     window.addEventListener('pointermove', (e) => {
       tx = e.clientX; ty = e.clientY;
       if (sx < -900) { sx = tx; sy = ty; }
+      if (spot.hidden) spot.hidden = false;
       if (!following) { following = true; requestAnimationFrame(follow); }
     }, { passive: true });
   }

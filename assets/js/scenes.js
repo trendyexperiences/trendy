@@ -240,6 +240,57 @@
     ctx.fill();
   }
 
+  // Capa que se redibuja un cuadro sí y otro no (para cosas que se mueven lento, como palmeras)
+  function slowLayer(S, key, ctx, w, h, draw) {
+    const scale = ctx.getTransform().a || 1;
+    let L = S[key];
+    if (!L) {
+      const c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(w * scale));
+      c.height = Math.max(1, Math.round(h * scale));
+      L = S[key] = { c, g: c.getContext('2d'), n: 0 };
+    }
+    if (L.n++ % 2 === 0 || reduceMotion) {
+      L.g.setTransform(1, 0, 0, 1, 0, 0);
+      L.g.clearRect(0, 0, L.c.width, L.c.height);
+      L.g.setTransform(scale, 0, 0, scale, 0, 0);
+      draw(L.g);
+    }
+    ctx.drawImage(L.c, 0, 0, w, h);
+  }
+
+  // Una multitud entera en un relleno (cuerpos y cabezas) y un trazo (brazos)
+  function drawCrowd(ctx, people, color) {
+    const bodies = new Path2D();
+    const arms = new Path2D();
+    let armW = 0, armN = 0;
+    for (const [x, y, s, bob, armsUp] of people) {
+      const yy = y - Math.abs(bob) * s * 0.12;
+      bodies.ellipse(x, yy - s * 0.82, s * 0.16, s * 0.19, 0, 0, TAU);
+      bodies.moveTo(x - s * 0.34, y + s * 0.1);
+      bodies.quadraticCurveTo(x - s * 0.36, yy - s * 0.52, x, yy - s * 0.58);
+      bodies.quadraticCurveTo(x + s * 0.36, yy - s * 0.52, x + s * 0.34, y + s * 0.1);
+      bodies.closePath();
+      if (armsUp) {
+        const lift = Math.sin(bob * Math.PI) * s * 0.08;
+        arms.moveTo(x - s * 0.24, yy - s * 0.48);
+        arms.lineTo(x - s * 0.42, yy - s * 1.15 - lift);
+        arms.moveTo(x + s * 0.24, yy - s * 0.48);
+        arms.lineTo(x + s * 0.4, yy - s * 1.12 + lift);
+        armW += s * 0.09;
+        armN++;
+      }
+    }
+    ctx.fillStyle = color;
+    ctx.fill(bodies);
+    if (armN) {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = armW / armN;
+      ctx.lineCap = 'round';
+      ctx.stroke(arms);
+    }
+  }
+
   function drawPerson(ctx, x, y, s, bob, color, armsUp) {
     ctx.fillStyle = color;
     const yy = y - Math.abs(bob) * s * 0.12;
@@ -275,12 +326,13 @@
       }));
     }
     ctx.fillStyle = '#e4eeff';
+    const prev = ctx.globalAlpha;
     for (const s of S.stars) {
       const a = 0.25 + 0.75 * (0.5 + 0.5 * Math.sin(t * s.s + s.p));
-      ctx.globalAlpha = a * (1 - (s.y / maxY) * 0.75);
+      ctx.globalAlpha = prev * a * (1 - (s.y / maxY) * 0.75);
       ctx.fillRect(s.x + (dx || 0), s.y + (dy || 0), s.r, s.r);
     }
-    ctx.globalAlpha = 1;
+    ctx.globalAlpha = prev;
   }
 
   function drawMoon(ctx, x, y, r) {
@@ -520,11 +572,27 @@
     ctx.closePath();
     ctx.fill();
 
-    // Dos palmeras que enmarcan
+    // Dos palmeras que enmarcan. Su balanceo es lento, así que se redibujan en una
+    // capa propia un cuadro sí y otro no; el resto del tiempo se reutiliza la capa.
     const ph = Math.min(h, w * (portrait ? 1.3 : 0.95));
     const px = mx * -30, py = my * -10;
-    drawPalm(ctx, { x: w * (portrait ? -0.06 : 0.05) + px, y: h * 1.03 + py, h: ph * (portrait ? 0.62 : 0.82), lean: 0.24, t, seed: 3, fronds: 9, rim: 'rgba(120,170,255,0.2)', rimSide: 'left' });
-    drawPalm(ctx, { x: w * (portrait ? 1.06 : 1.02) + px, y: h * 1.04 + py, h: ph * (portrait ? 0.5 : 0.62), lean: -0.28, t, seed: 5, fronds: 9 });
+    const scale = ctx.getTransform().a || 1;
+    if (!S.palms) {
+      S.palms = document.createElement('canvas');
+      S.palms.width = Math.round(w * scale);
+      S.palms.height = Math.round(h * scale);
+      S.pctx = S.palms.getContext('2d');
+      S.pframe = 0;
+    }
+    if (S.pframe++ % 2 === 0 || reduceMotion) {
+      const g = S.pctx;
+      g.setTransform(1, 0, 0, 1, 0, 0);
+      g.clearRect(0, 0, S.palms.width, S.palms.height);
+      g.setTransform(scale, 0, 0, scale, 0, 0);
+      drawPalm(g, { x: w * (portrait ? -0.06 : 0.05) + px, y: h * 1.03 + py, h: ph * (portrait ? 0.62 : 0.82), lean: 0.24, t, seed: 3, fronds: 9, rim: 'rgba(120,170,255,0.2)', rimSide: 'left' });
+      drawPalm(g, { x: w * (portrait ? 1.06 : 1.02) + px, y: h * 1.04 + py, h: ph * (portrait ? 0.5 : 0.62), lean: -0.28, t, seed: 5, fronds: 9 });
+    }
+    ctx.drawImage(S.palms, 0, 0, w, h);
 
     // Luciérnagas
     if (!S.flies) {
@@ -605,20 +673,22 @@
     ctx.globalCompositeOperation = 'source-over';
 
     // Palmeras en maceta
-    drawPalm(ctx, { x: cx - dw * 1.35, y: floorY, h: h * 0.42, lean: -0.12, t, seed: 51, color: '#02061a', fronds: 9 });
-    drawPalm(ctx, { x: cx + dw * 1.35, y: floorY, h: h * 0.4, lean: 0.12, t, seed: 53, color: '#02061a', fronds: 9 });
+    slowLayer(S, 'palms', ctx, w, h, (g) => {
+      drawPalm(g, { x: cx - dw * 1.35, y: floorY, h: h * 0.42, lean: -0.12, t, seed: 51, color: '#02061a', fronds: 9 });
+      drawPalm(g, { x: cx + dw * 1.35, y: floorY, h: h * 0.4, lean: 0.12, t, seed: 53, color: '#02061a', fronds: 9 });
+    });
 
-    // La fila
+    // La fila y el cadenero
     const beat = TE.beat();
     const unit = h * 0.24;
+    const line = [];
     for (let i = 0; i < 6; i++) {
       const x = cx - dw * 1.05 - i * unit * 0.5;
       if (x < -unit) break;
-      const bob = Math.sin((beat + i * 0.23) * TAU) * 0.3;
-      drawPerson(ctx, x, floorY + h * 0.06, unit * (0.95 + (i % 2) * 0.08), bob, '#01030b', false);
+      line.push([x, floorY + h * 0.06, unit * (0.95 + (i % 2) * 0.08), Math.sin((beat + i * 0.23) * TAU) * 0.3, false]);
     }
-    // El cadenero
-    drawPerson(ctx, cx + dw * 0.95, floorY + h * 0.08, unit * 1.25, 0, '#01020a', false);
+    drawCrowd(ctx, line, '#01030b');
+    drawCrowd(ctx, [[cx + dw * 0.95, floorY + h * 0.08, unit * 1.25, 0, false]], '#01020a');
 
     // Cordón de terciopelo
     const ry = floorY + h * 0.1;
@@ -684,36 +754,42 @@
     const rows = 9, cols = 12;
     const X = (z, c) => cx + (c / cols - 0.5) * w * (0.75 + 2.4 * z);
     const Y = (z) => y0 + (h - y0) * z * z;
-    const palette = ['69,243,255', '90,140,255', '255,79,180'];
+    const palette = ['rgb(69,243,255)', 'rgb(90,140,255)', 'rgb(255,79,180)'];
+    const LV = 24;
+    const tiles = new Map();
     for (let r = 0; r < rows; r++) {
       const z0 = r / rows, z1 = (r + 1) / rows;
       for (let c = 0; c < cols; c++) {
         const v = Math.sin(c * 0.9 + r * 1.3 - t * 2.4) + Math.sin(c * 0.4 - r * 0.7 + t * 1.1) + pulse * 0.8;
         const lit = Math.max(0, v - 0.6) / 2.2;
-        ctx.fillStyle = `rgba(${palette[(r + c) % 3]},${0.06 + lit * 0.75})`;
-        ctx.beginPath();
-        ctx.moveTo(X(z0, c), Y(z0));
-        ctx.lineTo(X(z0, c + 1), Y(z0));
-        ctx.lineTo(X(z1, c + 1), Y(z1));
-        ctx.lineTo(X(z1, c), Y(z1));
-        ctx.closePath();
-        ctx.fill();
+        const key = ((r + c) % 3) * 100 + Math.round((0.06 + lit * 0.75) * LV);
+        let path = tiles.get(key);
+        if (!path) tiles.set(key, (path = new Path2D()));
+        path.moveTo(X(z0, c), Y(z0));
+        path.lineTo(X(z0, c + 1), Y(z0));
+        path.lineTo(X(z1, c + 1), Y(z1));
+        path.lineTo(X(z1, c), Y(z1));
+        path.closePath();
       }
     }
+    tiles.forEach((path, key) => {
+      ctx.fillStyle = palette[Math.floor(key / 100)];
+      ctx.globalAlpha = Math.min(1, (key % 100) / LV);
+      ctx.fill(path);
+    });
+    ctx.globalAlpha = 1;
     ctx.strokeStyle = 'rgba(2,4,14,0.9)';
     ctx.lineWidth = 2;
+    ctx.beginPath();
     for (let r = 0; r <= rows; r++) {
-      ctx.beginPath();
       ctx.moveTo(X(r / rows, 0), Y(r / rows));
       ctx.lineTo(X(r / rows, cols), Y(r / rows));
-      ctx.stroke();
     }
     for (let c = 0; c <= cols; c++) {
-      ctx.beginPath();
       ctx.moveTo(X(0, c), Y(0));
       ctx.lineTo(X(1, c), Y(1));
-      ctx.stroke();
     }
+    ctx.stroke();
 
     // Bola disco
     const bx = cx, by = h * 0.15, br = Math.min(w, h) * 0.075;
@@ -730,15 +806,24 @@
     ctx.fillStyle = '#1c2a4f';
     ctx.fillRect(bx - br, by - br, br * 2, br * 2);
     const tile = br / 5;
+    const mirrors = new Map();
+    const off = ((t * 0.6 * tile) % tile);
     for (let gy = -5; gy < 5; gy++) {
       for (let gx = -6; gx < 6; gx++) {
-        const off = ((t * 0.6 * tile) % tile);
         const tx = bx + gx * tile + off, ty = by + gy * tile;
         const lum = 0.5 + 0.5 * Math.sin(gx * 1.7 + gy * 2.3 + t * 3);
-        ctx.fillStyle = `rgba(${lum > 0.85 ? '230,250,255' : '120,150,210'},${0.35 + lum * 0.6})`;
-        ctx.fillRect(tx + 0.6, ty + 0.6, tile - 1.2, tile - 1.2);
+        const key = (lum > 0.85 ? 100 : 0) + Math.round((0.35 + lum * 0.6) * 12);
+        let path = mirrors.get(key);
+        if (!path) mirrors.set(key, (path = new Path2D()));
+        path.rect(tx + 0.6, ty + 0.6, tile - 1.2, tile - 1.2);
       }
     }
+    mirrors.forEach((path, key) => {
+      ctx.fillStyle = key >= 100 ? 'rgb(230,250,255)' : 'rgb(120,150,210)';
+      ctx.globalAlpha = Math.min(1, (key % 100) / 12);
+      ctx.fill(path);
+    });
+    ctx.globalAlpha = 1;
     ctx.restore();
     ctx.globalCompositeOperation = 'lighter';
     glow(ctx, bx, by, br * 3, '180,220,255', 0.2 + pulse * 0.15);
@@ -754,12 +839,13 @@
 
     // Gente bailando
     const n = Math.max(9, Math.round(w / 70));
+    const crowd = [];
     for (let i = 0; i < n; i++) {
       const x = (i + 0.5) * (w / n) + Math.sin(i * 7.1) * 14;
       const ph = (beat + i * 0.137) % 1;
-      const bob = Math.sin(ph * TAU) * 0.7;
-      drawPerson(ctx, x, h + h * 0.05, h * (0.24 + ((i * 37) % 7) * 0.012), bob, '#01020a', i % 3 === 0);
+      crowd.push([x, h + h * 0.05, h * (0.24 + ((i * 37) % 7) * 0.012), Math.sin(ph * TAU) * 0.7, i % 3 === 0]);
     }
+    drawCrowd(ctx, crowd, '#01020a');
     ctx.fillStyle = linear(ctx, 0, 0, 0, h, [[0, 'rgba(40,80,170,0.1)'], [0.6, 'rgba(40,80,170,0)'], [1, 'rgba(1,2,10,0.4)']]);
     ctx.fillRect(0, 0, w, h);
   }
@@ -1035,9 +1121,11 @@
       const d = (y - hz) / (h * 0.8 - hz);
       const sp = w * 0.04 * (1 + d * 3);
       const len = sp * (0.3 + 0.5 * Math.abs(Math.sin(t + y * 0.15)));
-      ctx.fillStyle = `rgba(255,200,180,${(1 - d) * 0.45})`;
+      ctx.fillStyle = 'rgb(255,200,180)';
+      ctx.globalAlpha = (1 - d) * 0.45;
       ctx.fillRect(sunX + Math.sin(y * 0.07 + t * 0.8) * sp - len / 2, y, len, 1.3);
     }
+    ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
 
     // Aves
@@ -1062,11 +1150,12 @@
     for (let x = 0; x < w; x += 46) ctx.fillRect(x, h * 0.74, 4, deck - h * 0.74);
 
     // Pareja mirando el amanecer
-    drawPerson(ctx, w * 0.42, deck + 2, h * 0.22, 0, '#030716', false);
-    drawPerson(ctx, w * 0.47, deck + 2, h * 0.205, 0, '#030716', false);
+    drawCrowd(ctx, [[w * 0.42, deck + 2, h * 0.22, 0, false], [w * 0.47, deck + 2, h * 0.205, 0, false]], '#030716');
 
-    drawPalm(ctx, { x: w * 0.05, y: h * 1.02, h: h * 0.85, lean: 0.28, t, seed: 61 });
-    drawPalm(ctx, { x: w * 0.98, y: h * 1.02, h: h * 0.7, lean: -0.3, t, seed: 63 });
+    slowLayer(S, 'palms', ctx, w, h, (g) => {
+      drawPalm(g, { x: w * 0.05, y: h * 1.02, h: h * 0.85, lean: 0.28, t, seed: 61 });
+      drawPalm(g, { x: w * 0.98, y: h * 1.02, h: h * 0.7, lean: -0.3, t, seed: 63 });
+    });
 
     // Foquitos colgantes
     ctx.strokeStyle = 'rgba(10,18,40,0.9)';
@@ -1079,17 +1168,19 @@
       ctx.stroke();
       const n = 14;
       ctx.globalCompositeOperation = 'lighter';
+      ctx.fillStyle = 'rgb(255,236,200)';
       for (let i = 1; i < n; i++) {
         const s = i / n;
         const x = w * s;
         const y = (1 - s) * (1 - s) * y1 + 2 * (1 - s) * s * (y2 + sag) + s * s * y1 + 6;
         const a = 0.55 + 0.45 * Math.sin(t * 2 + i * 1.3 + ri);
         glow(ctx, x, y, 16, '255,210,150', 0.55 * a);
-        ctx.fillStyle = `rgba(255,236,200,${0.8 * a})`;
+        ctx.globalAlpha = 0.8 * a;
         ctx.beginPath();
         ctx.arc(x, y, 2.4, 0, TAU);
         ctx.fill();
       }
+      ctx.globalAlpha = 1;
       ctx.globalCompositeOperation = 'source-over';
     });
   }
@@ -1207,7 +1298,9 @@
       this.ro.observe(canvas);
       this.io = new IntersectionObserver(
         (entries) => {
-          const v = entries[0].isIntersecting;
+          // tocar el borde no cuenta: solo se anima si de verdad se ve algo
+          const e = entries[entries.length - 1];
+          const v = e.isIntersecting && e.intersectionRect.height > 1 && e.intersectionRect.width > 1;
           if (v && !this.visible) {
             this.visible = true;
             if (!reduceMotion) this.raf = requestAnimationFrame(this.loop);
@@ -1217,7 +1310,7 @@
             cancelAnimationFrame(this.raf);
           }
         },
-        { rootMargin: '120px' }
+        { rootMargin: '0px', threshold: [0, 0.002, 0.01, 0.05] }
       );
       this.io.observe(canvas);
       document.addEventListener('visibilitychange', () => {
@@ -1245,6 +1338,11 @@
       this.ctx.save();
       this.render(this.ctx, this.w, this.h, t, this.S, this);
       this.ctx.restore();
+      if (this.post) {
+        this.ctx.save();
+        this.post(this.ctx, this.w, this.h);
+        this.ctx.restore();
+      }
     }
 
     set(name) {
@@ -1281,6 +1379,52 @@
       this.raf = requestAnimationFrame(this.loop);
     }
   }
+
+  // Portal de la luna: la noche con un hueco en forma de luna creciente, dibujado
+  // como vector dentro del canvas (antes era una máscara SVG a pantalla completa).
+  const CRESCENT = 'M61.781 52.281A12 12 0 1 1 47.719 38.219A10 10 0 0 0 61.781 52.281Z';
+  let crescentPath = null;
+  TE.drawPortal = function (ctx, w, h) {
+    const P = TE.portal;
+    if (!P || (P.s >= 109 && P.wave <= 0)) return;
+    if (!crescentPath) crescentPath = new Path2D(CRESCENT);
+    const zoom = P.zoom || 1;
+    // el canvas está escalado por CSS (zoom); se compensa para dibujar en coordenadas de pantalla
+    const ox = w * 0.42, oy = h * 0.55;
+    ctx.translate(ox, oy);
+    ctx.scale(1 / zoom, 1 / zoom);
+    ctx.translate(-ox, -oy);
+    const sc = Math.max(w, h) / 100;
+    const vb = (s) => new DOMMatrix().translate((w - 100 * sc) / 2, (h - 100 * sc) / 2).scale(sc).translate(42, 55).scale(s).translate(-42, -55);
+    const ring = new Path2D();
+    ring.addPath(crescentPath, vb(P.s));
+    if (P.s < 109) {
+      const night = new Path2D();
+      night.rect(-w, -h, w * 3, h * 3);
+      night.addPath(crescentPath, vb(P.s));
+      ctx.fillStyle = '#030817';
+      ctx.fill(night, 'evenodd');
+    }
+    ctx.lineJoin = 'round';
+    if (P.ring > 0) {
+      ctx.strokeStyle = '#45f3ff';
+      // brillo de neón en tres pasadas (sin shadowBlur)
+      [[10, 0.1], [4.8, 0.25], [2, 1]].forEach(([lw, al]) => {
+        ctx.lineWidth = lw * zoom;
+        ctx.globalAlpha = P.ring * al;
+        ctx.stroke(ring);
+      });
+    }
+    if (P.wave > 0) {
+      const wave = new Path2D();
+      wave.addPath(crescentPath, vb(P.ws));
+      ctx.strokeStyle = '#ffffff';
+      ctx.globalAlpha = P.wave;
+      ctx.lineWidth = 3 * zoom;
+      ctx.stroke(wave);
+    }
+    ctx.globalAlpha = 1;
+  };
 
   TE.mountScene = function (canvas, name, opts) {
     if (!RENDERERS[name] || !canvas.getContext) return null;

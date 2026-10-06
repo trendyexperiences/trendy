@@ -284,7 +284,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   font-size: min(19.6vw, 31vh); line-height: 0.8; letter-spacing: -0.012em;
   margin-left: -0.03em;
 }
-.wordmark__line { display: block; overflow: hidden; padding-bottom: 0.02em; }
+.wordmark__line { display: block; overflow: hidden; padding-bottom: 0.02em; will-change: transform; }
 .wordmark__line > span { display: block; white-space: nowrap; }
 .wordmark .ch {
   display: inline-block;
@@ -337,9 +337,6 @@ ul { margin: 0; padding: 0; list-style: none; }
     linear-gradient(0deg, rgba(1, 3, 10, 0.9) 0%, rgba(1, 3, 10, 0) 38%),
     linear-gradient(180deg, rgba(1, 3, 10, 0.6) 0%, rgba(1, 3, 10, 0) 20%);
 }
-.portal { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; pointer-events: none; }
-.portal__ring path { stroke: var(--neon); stroke-width: 2; filter: drop-shadow(0 0 6px var(--neon)) drop-shadow(0 0 18px rgba(69, 243, 255, 0.6)); }
-.portal__ring--wave path { stroke: #fff; stroke-width: 3; }
 .games__bloom { position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0; background: radial-gradient(70% 70% at 42% 55%, rgba(220, 250, 255, 0.9), rgba(69, 243, 255, 0.35) 40%, transparent 75%); }
 .games__intro {
   position: absolute; inset: 0; pointer-events: none;
@@ -583,7 +580,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   .neon__l, .js .neon:not(.is-lit) .neon__l { color: #f1feff; text-shadow: var(--neon-glow); }
   .games { height: auto; }
   .games__sticky { position: relative; --zoom: 1; --ui: 1; }
-  .portal, .games__intro { display: none; }
+  .games__intro { display: none; }
   .games__sticky .games__ui { pointer-events: auto; }
   .fantasy { height: auto; }
   .fantasy__sticky { position: relative; --fs: 1 !important; --fsub: 1 !important; }
