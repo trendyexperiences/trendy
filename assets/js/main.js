@@ -91,6 +91,8 @@
     gate.classList.add('is-open');
     root.classList.remove('gated');
     setTimeout(() => hero.classList.add('is-in'), reduceMotion ? 0 : 450);
+    // terminada la entrada de cámara, el cielo pasa a moverse con el scroll
+    setTimeout(() => hero.classList.add('is-settled'), reduceMotion ? 0 : 450 + 3300);
     setTimeout(() => gate.classList.add('is-gone'), 1400);
   }
   if (gate) {
@@ -271,6 +273,7 @@
   /* ---------- scroll maestro ---------- */
   const progress = $('.progress span');
   const heroContent = $('.hero__content');
+  const heroCanvas = $('.hero__canvas');
   const lines = $$('.wordmark__line');
   let lastY = window.scrollY;
   let ticking = false;
@@ -286,38 +289,74 @@
     layout.fantasy = { top: fantasy.getBoundingClientRect().top + y, h: fantasy.offsetHeight };
   }
 
-  function onScroll() {
+  // ---- Scroll con inercia (estilo apple.com) ----
+  // El scroll del navegador sigue siendo nativo; lo que se suaviza son las
+  // animaciones que dependen de él: siguen a la posición real con una pequeña
+  // inercia, así cada "salto" de la rueda del mouse se convierte en un deslizamiento.
+  const coarse = window.matchMedia('(pointer: coarse)').matches;
+  const EASE_K = coarse ? 0.32 : 0.14;
+  let sy = window.scrollY;
+  let smoothing = false;
+
+  // Lo que debe responder al instante (header, barra de progreso)
+  function onScrollImmediate() {
     const y = window.scrollY;
     const vh = layout.vh;
-    const docH = layout.docH;
-    progress.style.transform = `scaleX(${docH > 0 ? y / docH : 0})`;
-
     header.classList.toggle('is-scrolled', y > 40);
     if (!menuOpen) {
       if (y > lastY + 4 && y > vh * 0.8) header.classList.add('is-hidden');
       else if (y < lastY - 4 || y < vh * 0.8) header.classList.remove('is-hidden');
     }
-    velocity = y - lastY;
     lastY = y;
+    ticking = false;
+  }
 
-    if (!reduceMotion && y < vh * 1.2) {
-      heroContent.style.transform = `translate3d(0, ${y * 0.25}px, 0)`;
-      heroContent.style.opacity = String(clamp(1 - y / (vh * 0.75), 0, 1));
-      lines[0].style.transform = `translate3d(${-y * 0.35}px, 0, 0)`;
-      lines[1].style.transform = `translate3d(${y * 0.35}px, 0, 0)`;
+  // Lo que se mueve con inercia
+  function render(y) {
+    const vh = layout.vh;
+    const docH = layout.docH;
+    progress.style.transform = `scaleX(${docH > 0 ? clamp(y / docH, 0, 1) : 0})`;
+    if (!reduceMotion && y < vh * 1.3) {
+      heroContent.style.transform = `translate3d(0, ${(y * 0.25).toFixed(1)}px, 0)`;
+      heroContent.style.opacity = String(clamp(1 - y / (vh * 0.75), 0, 1).toFixed(3));
+      lines[0].style.transform = `translate3d(${(-y * 0.35).toFixed(1)}px, 0, 0)`;
+      lines[1].style.transform = `translate3d(${(y * 0.35).toFixed(1)}px, 0, 0)`;
+      // el cielo se queda atrás: profundidad al bajar
+      if (hero.classList.contains('is-settled')) heroCanvas.style.transform = `translate3d(0, ${(y * 0.3).toFixed(1)}px, 0)`;
     }
-
     if (!reduceMotion) updatePortal(y, vh);
     else if (audio) audio.setOpenness(0.6);
-
     if (!reduceMotion) updateFantasy(y, vh);
+  }
+
+  let lastT = 0;
+  function smoothLoop(now) {
+    const target = window.scrollY;
+    const prev = sy;
+    // inercia basada en tiempo: se siente igual a 30, 60 o 120 cuadros por segundo
+    const dt = lastT ? Math.min(64, now - lastT) : 16.7;
+    lastT = now;
+    sy += (target - sy) * (1 - Math.pow(1 - EASE_K, dt / 16.7));
+    if (Math.abs(target - sy) < 0.4) sy = target;
+    velocity = sy - prev;
+    render(sy);
+    if (sy !== target) requestAnimationFrame(smoothLoop);
+    else { smoothing = false; lastT = 0; }
+  }
+  function kick() {
+    if (!smoothing) { smoothing = true; requestAnimationFrame(smoothLoop); }
+  }
+  function onScroll() {
+    // usado al medir o al cambiar el sonido: dibuja en la posición actual sin esperar
+    render(sy);
     ticking = false;
   }
   window.addEventListener('scroll', () => {
     if (!ticking) {
       ticking = true;
-      requestAnimationFrame(onScroll);
+      requestAnimationFrame(onScrollImmediate);
     }
+    if (reduceMotion) { sy = window.scrollY; render(sy); } else kick();
   }, { passive: true });
   const remeasure = () => { measure(); onScroll(); };
   window.addEventListener('resize', remeasure);
@@ -325,6 +364,40 @@
   (document.fonts ? document.fonts.ready : Promise.resolve()).then(remeasure);
   measure();
   onScroll();
+
+  // ---- Navegación con desplazamiento animado (curva suave, como Apple) ----
+  const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+  let navAnim = null;
+  function cancelNav() { if (navAnim) { cancelAnimationFrame(navAnim); navAnim = null; } }
+  ['wheel', 'touchstart', 'keydown'].forEach((ev) => window.addEventListener(ev, cancelNav, { passive: true }));
+  function scrollToY(to) {
+    cancelNav();
+    const from = window.scrollY;
+    const dist = to - from;
+    if (Math.abs(dist) < 2) return;
+    if (reduceMotion) { window.scrollTo(0, to); return; }
+    const dur = clamp(Math.abs(dist) * 0.35, 650, 1700);
+    const t0 = performance.now();
+    const step = (now) => {
+      const k = clamp((now - t0) / dur, 0, 1);
+      window.scrollTo(0, from + dist * easeInOut(k));
+      navAnim = k < 1 ? requestAnimationFrame(step) : null;
+    };
+    navAnim = requestAnimationFrame(step);
+  }
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a) return;
+    const id = a.getAttribute('href').slice(1);
+    const el = id && document.getElementById(id);
+    if (!el) return;
+    e.preventDefault();
+    let to = el.getBoundingClientRect().top + window.scrollY;
+    // "Juegos" aterriza con el antro ya abierto: el viaje pasa por la luna
+    if (id === 'juegos' && !reduceMotion) to += (el.offsetHeight - window.innerHeight) * 0.84;
+    scrollToY(Math.max(0, to));
+    if (history.replaceState) history.replaceState(null, '', '#' + id);
+  });
 
   /* ---------- inclinación según la velocidad del scroll ---------- */
   if (!reduceMotion && skewEls.length) {
