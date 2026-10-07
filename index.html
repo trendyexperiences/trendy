@@ -9,11 +9,18 @@
 <meta property="og:title" content="Trendy Experiences">
 <meta property="og:description" content="Developing fantasy.">
 <meta property="og:type" content="website">
-<script>document.documentElement.classList.add('js', 'gated')</script>
+<script>
+// Arranque a prueba de fallos: si el JS no llega a montar la portada, se muestra la página sin la puerta
+(function (h) {
+  h.classList.add('js', 'gated');
+  window.__teFail = setTimeout(function () { if (!window.__teOk) h.classList.remove('js', 'gated'); }, 8000);
+})(document.documentElement);
+</script>
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;700;800;900&family=Instrument+Sans:wght@400..700&family=Martian+Mono:wght@400;500&family=Tilt+Neon&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;700;800;900&family=Instrument+Sans:wght@400..700&family=Martian+Mono:wght@400;500&family=Tilt+Neon&display=swap" media="print" onload="this.media='all'" data-fonts>
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;700;800;900&family=Instrument+Sans:wght@400..700&family=Martian+Mono:wght@400;500&family=Tilt+Neon&display=swap"></noscript>
 <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>

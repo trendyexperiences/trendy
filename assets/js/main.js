@@ -17,6 +17,17 @@
 
   root.classList.add('js');
 
+  // Las fuentes cargan sin bloquear la página; esto espera a que estén listas (o se rindan)
+  const fontLink = $('link[data-fonts]');
+  const fontsReady = new Promise((r) => {
+    if (!fontLink || fontLink.media === 'all') return r();
+    fontLink.addEventListener('load', r);
+    fontLink.addEventListener('error', r);
+    setTimeout(r, 4000);
+  })
+    .then(() => new Promise((r) => requestAnimationFrame(() => r())))
+    .then(() => (document.fonts ? document.fonts.ready : null));
+
   // Parte un texto en letras (.ch) con su índice para animarlas en cascada
   function splitLetters(el, start) {
     let i = start || 0;
@@ -102,12 +113,12 @@
     const choices = $('[data-gate-choices]', gate);
     const minTime = reduceMotion ? 150 : 1500;
     const t0 = performance.now();
-    let fontsReady = false;
-    (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => (fontsReady = true));
-    setTimeout(() => (fontsReady = true), 3000);
+    let fontsDone = false;
+    fontsReady.then(() => (fontsDone = true));
+    setTimeout(() => (fontsDone = true), 3000);
     const tick = (now) => {
       const raw = clamp((now - t0) / minTime, 0, 1);
-      const shown = fontsReady ? 1 - Math.pow(1 - raw, 2.4) : Math.min(1 - Math.pow(1 - raw, 2.4), 0.9);
+      const shown = fontsDone ? 1 - Math.pow(1 - raw, 2.4) : Math.min(1 - Math.pow(1 - raw, 2.4), 0.9);
       count.textContent = String(Math.round(shown * 100)).padStart(3, '0');
       bar.style.transform = `scaleX(${shown})`;
       gate.style.setProperty('--ring', (100 - shown * 100).toFixed(2));
@@ -121,6 +132,9 @@
     };
     requestAnimationFrame(tick);
     $$('[data-enter]', gate).forEach((b) => b.addEventListener('click', () => enter(b.dataset.enter === 'sound')));
+    // la puerta ya funciona: se desactiva el plan de emergencia del arranque
+    window.__teOk = true;
+    clearTimeout(window.__teFail);
   } else {
     root.classList.remove('gated');
     hero.classList.add('is-in');
@@ -375,7 +389,7 @@
   const remeasure = () => { measure(); onScroll(); };
   window.addEventListener('resize', remeasure);
   if ('ResizeObserver' in window) new ResizeObserver(remeasure).observe(document.body);
-  (document.fonts ? document.fonts.ready : Promise.resolve()).then(remeasure);
+  fontsReady.then(remeasure);
   measure();
   onScroll();
 
@@ -604,7 +618,7 @@
     nav.addEventListener('pointerleave', () => moveTo(active()));
     new MutationObserver(() => { if (!nav.matches(':hover')) moveTo(active()); })
       .observe(nav, { subtree: true, attributes: true, attributeFilter: ['class'] });
-    (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => moveTo(active()));
+    fontsReady.then(() => moveTo(active()));
   }
 
   /* ---------- EL CLUB: profundidad con el mouse y deslizar entre zonas ---------- */
